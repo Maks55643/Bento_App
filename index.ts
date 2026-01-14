@@ -1,29 +1,44 @@
-const tg = window.Telegram.WebApp;
+ const tg = window.Telegram.WebApp;
 tg.expand();
 
-const OWNER_IDS = [ВАШ_ID]; // ← сюда свой TG ID
+const OWNER_IDS = [8354848795];
 
 const user = tg.initDataUnsafe?.user;
-const content = document.getElementById("content")!;
+const app = document.getElementById("app")!;
 
-if (!user) {
-  content.innerText = "Ошибка авторизации";
-  tg.close();
-}
-
-if (!OWNER_IDS.includes(user!.id)) {
-  content.innerText = "⛔ Нет доступа";
+if (!user || !OWNER_IDS.includes(user.id)) {
+  app.innerHTML = "⛔ Доступ запрещён";
   setTimeout(() => tg.close(), 1500);
   throw new Error("Access denied");
 }
 
-content.innerHTML = `
-  <p>👤 ${user!.first_name}</p>
-  <button id="apps">📨 Заявки</button>
-  <button id="admins">👥 Админы</button>
-  <button id="settings">⚙️ Настройки</button>
-`;
+renderMain();
 
-document.getElementById("apps")!.onclick = () => {
-  content.innerHTML = "📨 Управление заявками";
+function renderMain() {
+  app.innerHTML = `
+    <div class="header">👑 BENTO ADMIN</div>
+
+    <div class="card">
+      <div><b>${user!.first_name}</b></div>
+      <div class="user">ID: ${user!.id}</div>
+    </div>
+
+    <div class="card menu">
+      <button onclick="openSection('apps')">📨 Заявки</button>
+      <button onclick="openSection('admins')">👥 Админы</button>
+      <button onclick="openSection('blacklist')">⛔ Блэклист</button>
+      <button onclick="openSection('settings')">⚙️ Настройки</button>
+      <button class="exit" onclick="exitApp()">🚪 Выйти</button>
+    </div>
+  `;
+}
+
+// Навигация
+(window as any).openSection = (section: string) => {
+  app.innerHTML = `
+    <div class="header">← Назад</div>
+    <div class="card">Раздел: <b>${section}</b></div>
+  `;
 };
+
+(window as any).exitApp = () => tg.close();
