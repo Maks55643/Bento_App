@@ -3,17 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
+  <title>BENTO Admin</title>
 
+  <!-- Telegram Mini App API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div id="app">
-    <h2>👑 Admin Panel</h2>
-    <div id="content">Загрузка...</div>
-  </div>
 
-  <script type="module" src="index.ts"></script>
+  <style>
+    :root {
+      --bg: #0e0e11;
+      --card: #1c1c22;
+      --accent: #8774e1;
+      --text: #ffffff;
+      --muted: #9aa0a6;
+      --danger: #ff6b6b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    #app {
+      padding: 16px;
+    }
+
+    .header {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .user {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .menu button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 14px;
+      border: none;
+      background: #2a2a33;
+      color: var(--text);
+      font-size: 15px;
+      text-align: left;
+    }
+
+    .menu button:hover {
+      background: #333344;
+    }
+
+    .exit {
+      background: #2a1d1d !important;
+      color: var(--danger);
+    }
+
+    .back {
+      color: var(--accent);
+      font-size: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">Загрузка…</div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // 🔐 OWNER ID (ОБЯЗАТЕЛЬНО поменяй)
+    const OWNER_IDS = [123456789];
+
+    const user = tg.initDataUnsafe?.user;
+    const app = document.getElementById("app");
+
+    if (!user) {
+      app.innerHTML = "❌ Ошибка авторизации";
+      tg.close();
+    }
+
+    if (!OWNER_IDS.includes(user.id)) {
+      app.innerHTML = "⛔ Доступ запрещён";
+      setTimeout(() => tg.close(), 1500);
+      throw new Error("Access denied");
+    }
+
+    renderMain();
+
+    function renderMain() {
+      app.innerHTML = `
+        <div class="header">👑 BENTO ADMIN</div>
+
+        <div class="card">
+          <div><b>${user.first_name}</b></div>
+          <div class="user">ID: ${user.id}</div>
+        </div>
+
+        <div class="card menu">
+          <button onclick="openSection('apps')">📨 Заявки</button>
+          <button onclick="openSection('admins')">👥 Админы</button>
+          <button onclick="openSection('blacklist')">⛔ Блэклист</button>
+          <button onclick="openSection('settings')">⚙️ Настройки</button>
+          <button class="exit" onclick="tg.close()">🚪 Выйти</button>
+        </div>
+      `;
+    }
+
+    window.openSection = function(section) {
+      app.innerHTML = `
+        <div class="back" onclick="renderMain()">← Назад</div>
+        <div class="card">
+          <b>Раздел:</b> ${section}
+        </div>
+      `;
+    };
+  </script>
 </body>
 </html>
