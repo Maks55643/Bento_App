@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BENTO Admin</title>
+  <title>BENTO Admin Panel</title>
 
   <!-- Telegram Mini App API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -61,6 +61,7 @@
       background: var(--accent);
       color: white;
       font-size: 16px;
+      cursor: pointer;
     }
 
     .menu button {
@@ -105,27 +106,43 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 🔐 НАСТРОЙКИ
-    const OWNER_IDS = [8354848795]; // ← ВСТАВЬ СВОЙ TG ID
-    const PIN_CODE = "2580";       // ← ЗАДАЙ СВОЙ PIN
+    /* ================= НАСТРОЙКИ ================= */
 
-    const user = tg.initDataUnsafe?.user;
+    const OWNER_IDS = [123456789]; // ← ВСТАВЬ СВОЙ TG ID (БЕЗ КАВЫЧЕК)
+    const PIN_CODE = "2580";       // ← ТВОЙ PIN
+
+    /* ============================================= */
+
     const app = document.getElementById("app");
+    const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
 
-    // ❌ Нет пользователя
+    /* ====== ПРОВЕРКА TELEGRAM ====== */
+
     if (!user) {
-      app.innerHTML = "❌ Ошибка авторизации";
-      tg.close();
+      app.innerHTML = `
+        <div class="header">❌ Нет данных Telegram</div>
+        <div class="card">
+          <p>Открой админ-панель <b>ТОЛЬКО</b> через кнопку в боте.</p>
+        </div>
+      `;
+      throw new Error("No Telegram user");
     }
 
-    // ❌ Не owner
-    if (!OWNER_IDS.includes(user.id)) {
-      app.innerHTML = "⛔ Доступ запрещён";
-      setTimeout(() => tg.close(), 1500);
+    console.log("Telegram ID:", user.id);
+
+    if (!OWNER_IDS.includes(Number(user.id))) {
+      app.innerHTML = `
+        <div class="header">⛔ Доступ запрещён</div>
+        <div class="card">
+          <p><b>Твой ID:</b> ${user.id}</p>
+          <p>Нет прав администратора</p>
+        </div>
+      `;
       throw new Error("Access denied");
     }
 
-    // 🔐 PIN экран
+    /* ====== PIN ====== */
+
     showPin();
 
     function showPin() {
@@ -146,16 +163,18 @@
 
     function checkPin() {
       const value = document.getElementById("pin").value;
-
       if (value === PIN_CODE) {
         renderMain();
       } else {
-        app.innerHTML = "❌ Неверный PIN";
-        setTimeout(() => tg.close(), 1500);
+        app.innerHTML = `
+          <div class="header">❌ Неверный PIN</div>
+          <div class="card">Попробуй снова</div>
+        `;
       }
     }
 
-    // 👑 ГЛАВНОЕ МЕНЮ
+    /* ====== ГЛАВНОЕ МЕНЮ ====== */
+
     function renderMain() {
       app.innerHTML = `
         <div class="header">👑 BENTO ADMIN</div>
@@ -175,15 +194,16 @@
       `;
     }
 
-    // 📂 РАЗДЕЛЫ
-    function openSection(section) {
+    /* ====== РАЗДЕЛЫ ====== */
+
+    window.openSection = function(section) {
       app.innerHTML = `
         <div class="back" onclick="renderMain()">← Назад</div>
         <div class="card">
           <b>Раздел:</b> ${section}
         </div>
       `;
-    }
+    };
   </script>
 </body>
 </html>
