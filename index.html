@@ -52,15 +52,19 @@
       margin-top: 4px;
     }
 
-    .menu button {
+    button {
       width: 100%;
       padding: 14px;
       margin-top: 10px;
       border-radius: 14px;
       border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+    }
+
+    .menu button {
       background: #2a2a33;
-      color: var(--text);
-      font-size: 15px;
       text-align: left;
     }
 
@@ -79,6 +83,18 @@
       margin-bottom: 10px;
       cursor: pointer;
     }
+
+    input {
+      width: 100%;
+      padding: 16px;
+      font-size: 20px;
+      border-radius: 14px;
+      border: none;
+      background: #2a2a33;
+      color: white;
+      text-align: center;
+      letter-spacing: 6px;
+    }
   </style>
 </head>
 
@@ -89,66 +105,57 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 🔐 OWNER ID (ОБЯЗАТЕЛЬНО поменяй)
-    const OWNER_IDS = [8354848795];
+    // 🔐 НАСТРОЙКИ
+    const OWNER_IDS = [54]; // ← ВСТАВЬ СВОЙ TG ID
+    const PIN_CODE = "2580";       // ← ЗАДАЙ СВОЙ PIN
 
     const user = tg.initDataUnsafe?.user;
     const app = document.getElementById("app");
 
+    // ❌ Нет пользователя
     if (!user) {
       app.innerHTML = "❌ Ошибка авторизации";
       tg.close();
     }
 
+    // ❌ Не owner
     if (!OWNER_IDS.includes(user.id)) {
       app.innerHTML = "⛔ Доступ запрещён";
       setTimeout(() => tg.close(), 1500);
       throw new Error("Access denied");
     }
 
-    const PIN_CODE = "2580"; // 🔐 ЗАДАЙ СВОЙ PIN
-
+    // 🔐 PIN экран
     showPin();
 
     function showPin() {
-  app.innerHTML = `
-    <div class="header">🔐 Введите PIN</div>
+      app.innerHTML = `
+        <div class="header">🔐 Введите PIN</div>
+        <div class="card">
+          <input
+            id="pin"
+            type="password"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="••••"
+          />
+          <button onclick="checkPin()">Войти</button>
+        </div>
+      `;
+    }
 
-    <div class="card">
-      <input
-        id="pin"
-        type="password"
-        inputmode="numeric"
-        maxlength="6"
-        placeholder="••••"
-        style="
-          width:100%;
-          padding:16px;
-          font-size:20px;
-          border-radius:14px;
-          border:none;
-          background:#2a2a33;
-          color:white;
-          text-align:center;
-          letter-spacing:6px;
-        "
-      />
-      <button style="margin-top:12px" onclick="checkPin()">Войти</button>
-    </div>
-  `;
-}
+    function checkPin() {
+      const value = document.getElementById("pin").value;
 
-function checkPin() {
-  const value = document.getElementById("pin").value;
+      if (value === PIN_CODE) {
+        renderMain();
+      } else {
+        app.innerHTML = "❌ Неверный PIN";
+        setTimeout(() => tg.close(), 1500);
+      }
+    }
 
-  if (value === PIN_CODE) {
-    renderMain();
-  } else {
-    app.innerHTML = "❌ Неверный PIN";
-    setTimeout(() => tg.close(), 1500);
-  }
-}
-
+    // 👑 ГЛАВНОЕ МЕНЮ
     function renderMain() {
       app.innerHTML = `
         <div class="header">👑 BENTO ADMIN</div>
@@ -159,7 +166,7 @@ function checkPin() {
         </div>
 
         <div class="card menu">
-          <button onclick="openSection('apps')">📨 Заявки</button>
+          <button onclick="openSection('applications')">📨 Заявки</button>
           <button onclick="openSection('admins')">👥 Админы</button>
           <button onclick="openSection('blacklist')">⛔ Блэклист</button>
           <button onclick="openSection('settings')">⚙️ Настройки</button>
@@ -168,14 +175,15 @@ function checkPin() {
       `;
     }
 
-    window.openSection = function(section) {
+    // 📂 РАЗДЕЛЫ
+    function openSection(section) {
       app.innerHTML = `
         <div class="back" onclick="renderMain()">← Назад</div>
         <div class="card">
           <b>Раздел:</b> ${section}
         </div>
       `;
-    };
+    }
   </script>
 </body>
 </html>
