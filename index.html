@@ -54,6 +54,7 @@ body{
   padding:24px;
   width:100%;
   max-width:360px;
+  text-align:center;
 }
 
 .avatar{
@@ -76,7 +77,6 @@ body{
   font-size:22px;font-weight:600;
   display:flex;align-items:center;justify-content:center;
 }
-
 .key.empty{background:none}
 
 .big-btn{
@@ -101,13 +101,24 @@ body{
 
 /* ===== FACE ID ===== */
 .faceid{
-  width:110px;
-  height:110px;
-  border-radius:28px;
+  width:120px;
+  height:120px;
+  border-radius:30px;
   border:2px solid var(--accent);
   position:relative;
-  margin:24px auto;
+  margin:26px auto;
   overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.faceid svg{
+  width:56px;
+  height:56px;
+  stroke:var(--accent);
+  opacity:.85;
+  z-index:2;
 }
 
 .faceid::before{
@@ -115,8 +126,8 @@ body{
   position:absolute;
   inset:18px;
   border:2px solid var(--accent);
-  border-radius:20px;
-  opacity:.6;
+  border-radius:22px;
+  opacity:.5;
 }
 
 .scan-line{
@@ -126,12 +137,13 @@ body{
   height:6px;
   background:linear-gradient(90deg,transparent,var(--accent),transparent);
   animation:scan 1.2s infinite;
+  z-index:1;
 }
 
 @keyframes scan{
-  0%{top:0}
-  50%{top:100%}
-  100%{top:0}
+  0%{top:-6px}
+  50%{top:120px}
+  100%{top:-6px}
 }
 </style>
 </head>
@@ -193,16 +205,10 @@ function press(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
   error=false;
-
-  if(input.length===4){
-    check();
-    return; // ⬅️ ВАЖНО
-  }
-
+  if(input.length===4){ check(); return; }
   drawPin();
 }
 
-/* ✅ ЗАМЕНА ТОЛЬКО ЭТОЙ ЛОГИКИ */
 function check(){
   if(input===PIN) faceID();
   else{input="";error=true;drawPin();}
@@ -211,12 +217,22 @@ function check(){
 /* FACE ID */
 function faceID(){
   app.innerHTML=`
-    <div class="card" style="text-align:center">
-      <h3>Face ID</h3>
-      <p style="color:var(--muted)">Подтвердите вход</p>
-      <div class="faceid"><div class="scan-line"></div></div>
-      <p style="color:var(--muted)">Сканирование…</p>
-    </div>`;
+  <div class="card">
+    <h3>Face ID</h3>
+    <p style="color:var(--muted)">Подтвердите вход</p>
+
+    <div class="faceid">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M4 7V5a2 2 0 0 1 2-2h2M20 7V5a2 2 0 0 0-2-2h-2M4 17v2a2 2 0 0 0 2 2h2M20 17v2a2 2 0 0 1-2 2h-2"/>
+        <circle cx="9" cy="10" r="1"/>
+        <circle cx="15" cy="10" r="1"/>
+        <path d="M9 15c.8.7 1.7 1 3 1s2.2-.3 3-1"/>
+      </svg>
+      <div class="scan-line"></div>
+    </div>
+
+    <p style="color:var(--muted)">Сканирование…</p>
+  </div>`;
   setTimeout(menu,1800);
 }
 
