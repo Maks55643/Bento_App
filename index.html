@@ -126,21 +126,29 @@ function resetIdle(){
 async function start(){
   resetIdle();
 
-  const { data } = await sb
+  if (!user || !user.id) {
+    app.innerHTML = "⛔ Telegram user не найден";
+    return;
+  }
+
+  const { data, error } = await sb
     .from("admins")
-    .select("*")
-    .eq("id", user.id)
+    .select("id, role, pin")
+    .eq("id", Number(user.id))
     .single();
 
-  if(!data){
+  if (error || !data) {
     app.innerHTML = "⛔ Нет доступа";
     return;
   }
 
-  ROLE = data.role;
+  ROLE = String(data.role).trim();
+  USER_PIN = String(data.pin).trim(); // 🔥 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
 
-  // ✅ ИСПРАВЛЕНИЕ ОШИБКИ PIN
-  USER_PIN = data.pin ? String(data.pin) : "2580";
+  if (USER_PIN.length !== 4) {
+    app.innerHTML = "❌ Ошибка PIN в базе";
+    return;
+  }
 
   pin();
 }
