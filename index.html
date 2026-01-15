@@ -191,7 +191,9 @@ function menu(){
   <div class="card">
     <h2>👑 BENTO ADMIN</h2>
     <p>${user.first_name} • ${ROLE}</p>
+
     <button class="big-btn" onclick="adminPanel()">🛡 Админы</button>
+    <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
     <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
@@ -208,6 +210,15 @@ async function adminPanel(){
         <button onclick="delAdmin(${a.id})">❌</button>
       </div>`).join("")}
     <button class="big-btn" onclick="addAdmin()">➕ Добавить</button>
+  </div>`;
+}
+  
+  function settings(){
+  app.innerHTML=`
+  <div class="card">
+    <div class="back" onclick="menu()">← Назад</div>
+
+    <button class="big-btn" onclick="toggleTheme()">🌗 Сменить тему</button>
   </div>`;
 }
 
