@@ -11,7 +11,6 @@
 
 <style>
 :root{
-  --bg:#0e0f13;
   --glass:rgba(28,28,36,.75);
   --stroke:rgba(255,255,255,.06);
   --accent:#7a7cff;
@@ -49,8 +48,6 @@ body{
   font-size:38px;font-weight:700;
   margin:0 auto 14px;
 }
-.name{font-size:22px;font-weight:600}
-.role{color:var(--muted);margin-bottom:22px}
 .dots{display:flex;justify-content:center;gap:14px;margin:26px 0}
 .dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
 .dot.fill{background:var(--accent)}
@@ -63,38 +60,15 @@ body{
   display:flex;align-items:center;justify-content:center;
 }
 .key.empty{background:none}
-.panel{width:100%;max-width:380px}
 button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:none;
-  background:var(--accent);
-  color:white;
-  font-size:16px;
-  font-weight:600;
-  margin-top:12px;
+  width:100%;padding:14px;border-radius:16px;
+  border:none;background:var(--accent);
+  color:white;font-size:16px;font-weight:600;margin-top:12px;
 }
-button.danger{
-  background:#2a1d1d;
-  color:var(--danger);
-}
-.back{
-  color:var(--accent);
-  cursor:pointer;
-  text-align:left;
-  margin-bottom:14px;
-}
-.admin-input{
-  width:100%;
-  padding:14px 16px;
-  border-radius:16px;
-  border:1px solid var(--stroke);
-  background:#1f2030;
-  color:white;
-  font-size:15px;
-}
-.admin{display:flex;justify-content:space-between;align-items:center;padding:14px;background:#1b1c28;border-radius:18px;margin-top:12px}
+button.danger{background:#2a1d1d;color:var(--danger)}
+.back{color:var(--accent);cursor:pointer;text-align:left;margin-bottom:14px}
+.admin{display:flex;justify-content:space-between;align-items:center;
+  padding:14px;background:#1b1c28;border-radius:18px;margin-top:12px}
 .admin-del{color:var(--danger);cursor:pointer}
 </style>
 </head>
@@ -112,64 +86,38 @@ const sb = supabase.createClient(
   "sb_publishable_W37lFR5w6xlYXYtUinLtjA_IEqOP-ci"
 );
 
-let ROLE=null, USER_PIN="", input="", error=false;
+let ROLE="", PIN="", input="", error=false;
 const app=document.getElementById("app");
 
-/* AUTO EXIT */
-let idle;
-function resetIdle(){
-  clearTimeout(idle);
-  idle=setTimeout(()=>tg.close(),180000);
-}
-["click","touchstart","keydown"].forEach(e=>document.addEventListener(e,resetIdle));
-
+/* START */
 async function start(){
-  resetIdle();
+  if(!user?.id) return app.innerHTML="⛔ Telegram error";
 
-  if (!user || !user.id) {
-    app.innerHTML = "⛔ Telegram user не найден";
-    return;
-  }
+  const {data}=await sb.from("admins")
+    .select("role,pin").eq("id",user.id).single();
 
-  const { data, error } = await sb
-    .from("admins")
-    .select("id, role, pin")
-    .eq("id", Number(user.id))
-    .single();
+  if(!data) return app.innerHTML="⛔ Нет доступа";
 
-  if (error || !data) {
-    app.innerHTML = "⛔ Нет доступа";
-    return;
-  }
+  ROLE=data.role;
+  PIN=String(data.pin).trim();
 
-  ROLE = String(data.role).trim();
-  USER_PIN = String(data.pin).trim(); // 🔥 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+  if(PIN.length!==4) return app.innerHTML="❌ PIN в базе неверный";
 
-  if (USER_PIN.length !== 4) {
-    app.innerHTML = "❌ Ошибка PIN в базе";
-    return;
-  }
-
-  pin();
+  drawPin();
 }
 
 /* PIN */
-function pin(){
+function drawPin(){
   app.innerHTML=`
   <div class="card">
     <div class="avatar">${user.first_name[0]}</div>
-    <div class="name">${user.first_name}</div>
-    <div class="role">${ROLE}</div>
     <div class="dots">
-      ${[0,1,2,3].map(i=>`
-        <div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>
-      `).join("")}
+      ${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}
     </div>
     <div class="keypad">
-      ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
-        k==="" 
-          ? `<div class="key empty"></div>`
-          : `<div class="key" onclick="press('${k}')">${k}</div>`
+      ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?
+        `<div class="key empty"></div>`:
+        `<div class="key" onclick="press('${k}')">${k}</div>`
       ).join("")}
     </div>
   </div>`;
@@ -179,43 +127,24 @@ function press(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
   error=false;
-  if(input.length===4) return setTimeout(checkPin,200);
-  pin();
+  if(input.length===4) return check();
+  drawPin();
 }
 
-function checkPin(){
-  if (String(input) === String(USER_PIN)) {
-    welcome();
-  } else {
-    input = "";
-    error = true;
-    pin();
-  }
-}
-
-/* WELCOME */
-function welcome(){
-  app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <h2>Добро пожаловать</h2>
-      <p style="color:var(--muted)">BENTO ADMIN PANEL</p>
-    </div>
-  </div>`;
-  setTimeout(menu,1200);
+function check(){
+  if(input===PIN) menu();
+  else{input="";error=true;drawPin();}
 }
 
 /* MENU */
 function menu(){
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <h2>👑 BENTO ADMIN</h2>
-      <p>${user.first_name} • ${ROLE}</p>
-      <button onclick="settings()">⚙️ Настройки</button>
-      ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
-      <button class="danger" onclick="tg.close()">🚪 Выйти</button>
-    </div>
+  <div class="card">
+    <h2>👑 BENTO ADMIN</h2>
+    <p>${user.first_name} • ${ROLE}</p>
+    <button onclick="settings()">⚙️ Настройки</button>
+    ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
+    <button class="danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
 
@@ -223,29 +152,26 @@ function menu(){
 function settings(){
   input="";
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <div class="back" onclick="menu()">← Назад</div>
-      <h3>🔐 Новый PIN</h3>
-      <div class="dots">${[0,1,2,3].map(()=>`<div class="dot"></div>`).join("")}</div>
-      <div class="keypad">
-        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
-          k==="" 
-            ? `<div class="key empty"></div>`
-            : `<div class="key" onclick="pinChange('${k}')">${k}</div>`
-        ).join("")}
-      </div>
+  <div class="card">
+    <div class="back" onclick="menu()">← Назад</div>
+    <h3>Новый PIN</h3>
+    <div class="dots">${[0,1,2,3].map(()=>`<div class="dot"></div>`).join("")}</div>
+    <div class="keypad">
+      ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?
+        `<div class="key empty"></div>`:
+        `<div class="key" onclick="changePin('${k}')">${k}</div>`
+      ).join("")}
     </div>
   </div>`;
 }
 
-async function pinChange(k){
+async function changePin(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
   document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("fill",input[i]));
   if(input.length===4){
     await sb.from("admins").update({pin:input}).eq("id",user.id);
-    USER_PIN = input;
+    PIN=input;
     menu();
   }
 }
@@ -254,20 +180,18 @@ async function pinChange(k){
 async function admins(){
   const {data}=await sb.from("admins").select("*");
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <div class="back" onclick="menu()">← Назад</div>
-      ${data.map(a=>`
-        <div class="admin">
-          <div>ID ${a.id}<br><small>${a.role}</small></div>
-          ${a.id!==user.id?`<div class="admin-del" onclick="delAdmin(${a.id})">✕</div>`:""}
-        </div>
-      `).join("")}
-    </div>
+  <div class="card">
+    <div class="back" onclick="menu()">← Назад</div>
+    ${data.map(a=>`
+      <div class="admin">
+        <div>ID ${a.id}<br><small>${a.role}</small></div>
+        ${a.id!==user.id?`<div class="admin-del" onclick="del(${a.id})">✕</div>`:""}
+      </div>
+    `).join("")}
   </div>`;
 }
 
-async function delAdmin(id){
+async function del(id){
   if(confirm("Удалить админа?")){
     await sb.from("admins").delete().eq("id",id);
     admins();
