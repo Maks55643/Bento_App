@@ -20,7 +20,7 @@
 
 * {
   box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display";
+  font-family:-apple-system,BlinkMacSystemFont;
 }
 
 body {
@@ -30,7 +30,6 @@ body {
 }
 
 #app {
-  padding:20px;
   min-height:100vh;
   display:flex;
   align-items:center;
@@ -59,7 +58,6 @@ body {
 .name {
   font-size:20px;
   font-weight:600;
-  margin-bottom:6px;
 }
 
 .role {
@@ -137,16 +135,16 @@ let input = "";
 let ROLE = null;
 const app = document.getElementById("app");
 
-/* ===== ACCESS CHECK ===== */
+/* ===== ACCESS ===== */
 async function checkAccess() {
-  const { data, error } = await sb
+  const { data } = await sb
     .from("admins")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (!data || error) {
-    app.innerHTML = "<div>⛔ Нет доступа</div>";
+  if (!data) {
+    app.innerHTML = "⛔ Нет доступа";
     return;
   }
 
@@ -154,7 +152,7 @@ async function checkAccess() {
   renderLock();
 }
 
-/* ===== LOCK SCREEN ===== */
+/* ===== LOCK ===== */
 function renderLock(error="") {
   app.innerHTML = `
     <div class="lock">
@@ -181,7 +179,7 @@ function renderLock(error="") {
   `;
 }
 
-/* ===== PIN INPUT ===== */
+/* ===== INPUT ===== */
 function press(k) {
   tg.HapticFeedback.impactOccurred("light");
 
@@ -193,11 +191,13 @@ function press(k) {
 
   if (input.length === 4) {
     checkPin();
+    return;
   }
 
   renderLock();
 }
 
+/* ===== CHECK PIN ===== */
 function checkPin() {
   if (input === PIN_CODE) {
     tg.HapticFeedback.notificationOccurred("success");
@@ -209,7 +209,7 @@ function checkPin() {
   }
 }
 
-/* ===== ADMIN PANEL ===== */
+/* ===== ADMIN ===== */
 function openAdmin() {
   app.innerHTML = `
     <div>
