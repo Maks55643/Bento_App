@@ -86,6 +86,89 @@ input,select{
   background:#1f2030;color:white;
   margin-top:12px;
 }
+  /* === ADMIN PANEL PREMIUM UI === */
+
+.admin-section{
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid var(--stroke);
+}
+
+.admin-input,
+.admin-select{
+  width:100%;
+  padding:16px 18px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  font-size:15px;
+  margin-bottom:12px;
+  outline:none;
+}
+
+.admin-input::placeholder{
+  color:var(--muted);
+}
+
+.admin-btn{
+  width:100%;
+  padding:16px;
+  border-radius:20px;
+  border:none;
+  background:linear-gradient(135deg,#7a7cff,#5f63ff);
+  color:white;
+  font-size:16px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-shadow:0 12px 30px rgba(122,124,255,.35);
+}
+
+.admin-list{
+  margin-top:20px;
+}
+
+.admin{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.admin-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.admin-id{
+  font-weight:600;
+  font-size:15px;
+}
+
+.admin-role{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.admin-del{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,107,107,.12);
+  color:var(--danger);
+  font-size:18px;
+}
 </style>
 </head>
 
@@ -217,23 +300,35 @@ async function changePin(k){
 /* ADMINS */
 async function admins(){
   const {data}=await sb.from("admins").select("*");
+
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
 
-    <input id="newId" placeholder="Telegram ID">
-    <select id="newRole">
-      <option value="ADMIN">ADMIN</option>
-      <option value="OWNER">OWNER</option>
-    </select>
-    <button onclick="addAdmin()">➕ Добавить админа</button>
+    <div class="admin-section">
+      <input id="newId" class="admin-input" placeholder="Telegram ID">
+      <select id="newRole" class="admin-input admin-select">
+        <option value="ADMIN">ADMIN</option>
+        <option value="OWNER">OWNER</option>
+      </select>
+      <button class="admin-btn" onclick="addAdmin()">
+        ➕ Добавить админа
+      </button>
+    </div>
 
-    ${data.map(a=>`
-      <div class="admin">
-        <div>ID ${a.id}<br><small>${a.role}</small></div>
-        ${a.id!==user.id?`<div class="admin-del" onclick="del(${a.id})">✕</div>`:""}
-      </div>
-    `).join("")}
+    <div class="admin-list">
+      ${data.map(a=>`
+        <div class="admin">
+          <div class="admin-info">
+            <div class="admin-id">ID ${a.id}</div>
+            <div class="admin-role">${a.role}</div>
+          </div>
+          ${a.id!==user.id
+            ? `<div class="admin-del" onclick="del(${a.id})">✕</div>`
+            : ``}
+        </div>
+      `).join("")}
+    </div>
   </div>`;
 }
 
