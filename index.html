@@ -11,7 +11,6 @@
 
 <style>
 :root{
-  --bg:#0e0f13;
   --glass:rgba(28,28,36,.75);
   --stroke:rgba(255,255,255,.06);
   --accent:#7a7cff;
@@ -36,6 +35,7 @@ body{
   padding:16px;
 }
 
+/* ===== GLASS CARD ===== */
 .card{
   background:var(--glass);
   backdrop-filter:blur(20px);
@@ -47,6 +47,7 @@ body{
   text-align:center;
 }
 
+/* ===== USER ===== */
 .avatar{
   width:90px;height:90px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
@@ -58,26 +59,13 @@ body{
 .name{font-size:22px;font-weight:600}
 .role{color:var(--muted);margin-bottom:22px}
 
-.dots{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  margin:26px 0;
-}
-
-.dot{
-  width:12px;height:12px;border-radius:50%;
-  background:#2b2c3a;
-}
+/* ===== PIN ===== */
+.dots{display:flex;justify-content:center;gap:14px;margin:26px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
 
-.keypad{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-}
-
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .key{
   height:64px;border-radius:22px;
   background:#1f2030;
@@ -85,11 +73,9 @@ body{
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
 }
-
 .key.empty{background:none;pointer-events:none}
 
-.panel{width:100%;max-width:380px}
-
+/* ===== BUTTONS ===== */
 button{
   width:100%;padding:14px;
   border-radius:16px;border:none;
@@ -97,20 +83,53 @@ button{
   color:white;font-size:16px;font-weight:600;
   margin-top:12px;
 }
-
 button.danger{background:#2a1d1d;color:var(--danger)}
 
 .back{color:var(--accent);cursor:pointer;margin-bottom:12px;text-align:left}
 
+/* ===== ADMINS UI ===== */
+.input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:16px;
+  background:#1f2030;
+  border:1px solid var(--stroke);
+  color:white;
+  font-size:15px;
+  margin-bottom:14px;
+}
+.input::placeholder{color:var(--muted)}
+
 .admin{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  padding:12px;
-  background:#1f2030;
-  border-radius:14px;
-  margin-top:10px;
-  font-size:14px;
+  justify-content:space-between;
+  padding:14px 16px;
+  background:linear-gradient(180deg,#1c1d2b,#171827);
+  border-radius:18px;
+  margin-top:12px;
+}
+
+.admin-left{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.admin-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#5f63ff);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;
+}
+
+.admin-role{font-size:12px;color:var(--muted)}
+
+.admin button{
+  background:none;
+  border:none;
+  color:var(--danger);
+  font-size:18px;
 }
 </style>
 </head>
@@ -179,16 +198,14 @@ function checkPin(){
 function menu(){
   resetIdle();
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <h2>👑 BENTO ADMIN</h2>
-      <p>${user.first_name} • ${ROLE}</p>
-      <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
-      <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
-      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-      <button class="danger" onclick="tg.close()">🚪 Выйти</button>
-    </div>
+  <div class="card">
+    <h2>👑 BENTO ADMIN</h2>
+    <p>${user.first_name} • ${ROLE}</p>
+    <button onclick="openSection('Заявки')">📨 Заявки</button>
+    ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
+    <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
+    <button onclick="openSection('Настройки')">⚙️ Настройки</button>
+    <button class="danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
 
@@ -197,18 +214,25 @@ async function admins(){
   resetIdle();
   const {data}=await sb.from("admins").select("*").order("role");
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <div class="back" onclick="menu()">← Назад</div>
-      <h3>👥 Админы</h3>
-      <input id="aid" placeholder="Telegram ID">
-      <button onclick="addAdmin()">➕ Добавить</button>
-      ${data.map(a=>`
-        <div class="admin">
-          <div>ID ${a.id}<br><small>${a.role}</small></div>
-          ${a.id!==user.id?`<button class="danger" onclick="delAdmin(${a.id})">✖</button>`:""}
-        </div>`).join("")}
-    </div>
+  <div class="card">
+    <div class="back" onclick="menu()">← Назад</div>
+    <h3>👥 Админы</h3>
+
+    <input id="aid" class="input" placeholder="Telegram ID">
+    <button onclick="addAdmin()">＋ Добавить админа</button>
+
+    ${data.map(a=>`
+      <div class="admin">
+        <div class="admin-left">
+          <div class="admin-avatar">${a.role[0]}</div>
+          <div>
+            <div>ID ${a.id}</div>
+            <div class="admin-role">${a.role}</div>
+          </div>
+        </div>
+        ${a.id!==user.id?`<button onclick="delAdmin(${a.id})">✕</button>`:""}
+      </div>
+    `).join("")}
   </div>`;
 }
 
@@ -229,12 +253,10 @@ async function delAdmin(id){
 function openSection(name){
   resetIdle();
   app.innerHTML=`
-  <div class="panel">
-    <div class="card">
-      <div class="back" onclick="menu()">← Назад</div>
-      <h2>${name}</h2>
-      <p style="color:var(--muted)">Раздел в разработке</p>
-    </div>
+  <div class="card">
+    <div class="back" onclick="menu()">← Назад</div>
+    <h2>${name}</h2>
+    <p style="color:var(--muted)">Раздел в разработке</p>
   </div>`;
 }
 
