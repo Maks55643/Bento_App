@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BENTO Admin Panel</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 :root{
---bg:#0e0e11;--card:#1c1c22;--accent:#8774e1;--text:#fff;
---muted:#9aa0a6;--danger:#ff6b6b;--success:#4cd964;--warn:#ffcc00;
+--bg:#0e0e11;--card:#1c1c22;--accent:#8774e1;
+--text:#fff;--muted:#9aa0a6;--danger:#ff6b6b;
+--success:#4cd964;--warn:#ffcc00;
 }
 *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont}
 body{margin:0;background:var(--bg);color:var(--text)}
@@ -23,12 +24,8 @@ button{width:100%;padding:14px;margin-top:10px;border-radius:14px;border:none;ba
 .exit{background:#2a1d1d;color:var(--danger)}
 .back{color:var(--accent);margin-bottom:10px;cursor:pointer}
 input{width:100%;padding:14px;border-radius:14px;border:none;background:#2a2a33;color:#fff;text-align:center}
-
-/* watermark */
 #watermark{position:fixed;bottom:10px;right:10px;opacity:.15;font-size:12px;pointer-events:none}
-
-/* logs */
-.log{padding:12px;border-radius:12px;margin-bottom:10px;font-size:14px}
+.log{padding:12px;border-radius:12px;margin-bottom:10px}
 .log.success{background:#1f2d24;color:var(--success)}
 .log.warn{background:#2b2a1f;color:var(--warn)}
 .log.danger{background:#2a1d1d;color:var(--danger)}
@@ -40,63 +37,77 @@ input{width:100%;padding:14px;border-radius:14px;border:none;background:#2a2a33;
 <div id="app">Загрузка…</div>
 
 <script>
-/* TELEGRAM ONLY */
+/* ===== TELEGRAM ONLY ===== */
 if(!window.Telegram||!Telegram.WebApp){
 document.body.innerHTML="<h2 style='color:red;text-align:center'>❌ Только через Telegram</h2>";
 throw new Error("No Telegram");
 }
-const tg=Telegram.WebApp;tg.expand();
 
-/* SETTINGS */
+const tg=Telegram.WebApp;tg.expand();
+const app=document.getElementById("app");
+const user=tg.initDataUnsafe?.user;
+
+/* ===== CONFIG ===== */
 const OWNER_IDS=[8354848795];
 const PIN_CODE="2580";
 const LOG_KEY="BENTO_LOGS";
 const ADMIN_KEY="BENTO_ADMINS";
 
-/* DATA */
-const app=document.getElementById("app");
-const user=tg.initDataUnsafe?.user;
-let admins=JSON.parse(localStorage.getItem(ADMIN_KEY)||"[]");
-
-/* ROLE */
-let ROLE=null;
-if(user){
-if(OWNER_IDS.includes(user.id)) ROLE="OWNER";
-else if(admins.includes(user.id)) ROLE="ADMIN";
+/* ===== HELPERS ===== */
+function getAdmins(){
+  return JSON.parse(localStorage.getItem(ADMIN_KEY)||"[]");
+}
+function setAdmins(a){
+  localStorage.setItem(ADMIN_KEY,JSON.stringify(a));
+}
+function getRole(){
+  if(!user) return null;
+  if(OWNER_IDS.includes(user.id)) return "OWNER";
+  if(getAdmins().includes(user.id)) return "ADMIN";
+  return null;
 }
 
-/* LOGS */
+/* ===== LOGS ===== */
 function addLog(type,text){
-const logs=JSON.parse(localStorage.getItem(LOG_KEY)||"[]");
-logs.unshift({time:new Date().toLocaleString(),type,text,id:user?.id||"—",role:ROLE||"GUEST"});
-localStorage.setItem(LOG_KEY,JSON.stringify(logs.slice(0,100)));
+  const logs=JSON.parse(localStorage.getItem(LOG_KEY)||"[]");
+  logs.unshift({
+    time:new Date().toLocaleString(),
+    type,text,
+    id:user?.id||"—",
+    role:getRole()||"GUEST"
+  });
+  localStorage.setItem(LOG_KEY,JSON.stringify(logs.slice(0,100)));
 }
 
-/* AUTO EXIT */
+/* ===== AUTO EXIT ===== */
 let idle;
 function resetIdle(){
-clearTimeout(idle);
-idle=setTimeout(()=>{addLog("warn","⏱ Автовыход");tg.close()},180000);
+  clearTimeout(idle);
+  idle=setTimeout(()=>{
+    addLog("warn","⏱ Автовыход");
+    tg.close();
+  },180000);
 }
 ["click","keydown","touchstart"].forEach(e=>document.addEventListener(e,resetIdle));
 resetIdle();
 
-/* ACCESS */
+/* ===== ACCESS ===== */
+const ROLE=getRole();
 if(!user||!ROLE){
-app.innerHTML=`
-<div class="header">⛔ Нет доступа</div>
-<div class="card">
-<div>ID: ${user?.id||"—"}</div>
-<button onclick="location.reload()">🔄 Обновить</button>
-</div>`;
-addLog("warn","⛔ Вход без прав");
-throw new Error("No access");
+  app.innerHTML=`
+  <div class="header">⛔ Нет доступа</div>
+  <div class="card">
+    <div>ID: ${user?.id||"—"}</div>
+    <button onclick="location.reload()">🔄 Обновить</button>
+  </div>`;
+  addLog("warn","⛔ Вход без прав");
+  throw new Error("No access");
 }
 
 addLog("success","🚀 Вход");
 showPin();
 
-/* PIN */
+/* ===== PIN ===== */
 function showPin(){
 app.innerHTML=`
 <div class="header">🔐 PIN</div>
@@ -105,69 +116,84 @@ app.innerHTML=`
 <button onclick="checkPin()">Войти</button>
 </div>`;
 }
+
 function checkPin(){
 if(pin.value===PIN_CODE){
-addLog("success","🔓 PIN OK");
-renderMain();addWatermark();
-}else{addLog("danger","❌ PIN");alert("Неверный PIN")}
+  addLog("success","🔓 PIN OK");
+  renderMain();
+  addWatermark();
+}else{
+  addLog("danger","❌ PIN");
+  alert("Неверный PIN");
+}
 }
 
-/* WATERMARK */
+/* ===== WATERMARK ===== */
 function addWatermark(){
 const wm=document.createElement("div");
 wm.id="watermark";
-wm.innerText=`BENTO • ${ROLE} • ID ${user.id}`;
+wm.innerText=`BENTO • ${getRole()} • ID ${user.id}`;
 document.body.appendChild(wm);
 }
 
-/* MAIN */
+/* ===== MAIN ===== */
 function renderMain(){
 app.innerHTML=`
 <div class="header">👑 BENTO ADMIN</div>
+
 <div class="card">
 <b>${user.first_name}</b>
 <div class="user">ID: ${user.id}</div>
-<div class="user">Роль: ${ROLE}</div>
+<div class="user">Роль: ${getRole()}</div>
 </div>
+
 <div class="card menu">
 <button onclick="openSection('Заявки')">📨 Заявки</button>
-${ROLE==="OWNER"?`<button onclick="openAdmins()">👥 Админы</button>`:""}
+${getRole()==="OWNER"?`<button onclick="openAdmins()">👥 Админы</button>`:""}
 <button onclick="openLogs()">📜 Логи</button>
 <button class="exit" onclick="addLog('warn','🚪 Выход');tg.close()">🚪 Выйти</button>
 </div>`;
 }
 
-/* ADMINS */
+/* ===== ADMINS ===== */
 function openAdmins(){
+const admins=getAdmins();
 app.innerHTML=`
 <div class="back" onclick="renderMain()">← Назад</div>
 <div class="header">👥 Админы</div>
+
 <div class="card">
 <input id="newAdmin" placeholder="Telegram ID">
 <button onclick="addAdmin()">➕ Добавить</button>
 </div>
+
 ${admins.map(id=>`
 <div class="card">
 ID ${id}
 <button class="exit" onclick="removeAdmin(${id})">❌ Удалить</button>
 </div>`).join("")}`;
 }
+
 function addAdmin(){
 const id=Number(newAdmin.value);
-if(!admins.includes(id)){
+if(!id) return alert("Неверный ID");
+const admins=getAdmins();
+if(admins.includes(id)) return alert("Уже админ");
 admins.push(id);
-localStorage.setItem(ADMIN_KEY,JSON.stringify(admins));
+setAdmins(admins);
 addLog("success","➕ Админ "+id);
-openAdmins();
-}}
-function removeAdmin(id){
-admins=admins.filter(a=>a!==id);
-localStorage.setItem(ADMIN_KEY,JSON.stringify(admins));
-addLog("warn","❌ Админ "+id);
 openAdmins();
 }
 
-/* LOG UI */
+function removeAdmin(id){
+let admins=getAdmins();
+admins=admins.filter(a=>a!==id);
+setAdmins(admins);
+addLog("warn","❌ Удалён админ "+id);
+openAdmins();
+}
+
+/* ===== LOG UI ===== */
 function openLogs(){
 const logs=JSON.parse(localStorage.getItem(LOG_KEY)||"[]");
 app.innerHTML=`
@@ -180,7 +206,7 @@ ${l.text}
 </div>`).join("")}`;
 }
 
-/* SECTIONS */
+/* ===== SECTIONS ===== */
 function openSection(name){
 app.innerHTML=`
 <div class="back" onclick="renderMain()">← Назад</div>
