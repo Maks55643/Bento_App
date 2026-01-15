@@ -15,99 +15,176 @@ body {
   color:#fff;
   font-family:-apple-system,BlinkMacSystemFont;
 }
-#app { padding:20px; }
+#app { padding:16px }
 .card {
   background:#1c1c22;
-  border-radius:16px;
+  border-radius:14px;
   padding:16px;
+  margin-bottom:12px;
 }
 button {
   width:100%;
   padding:14px;
+  margin-top:10px;
   border:none;
-  border-radius:14px;
+  border-radius:12px;
   background:#8774e1;
   color:white;
   font-size:16px;
 }
-.error { color:#ff6b6b; }
+.exit { background:#2a1d1d; color:#ff6b6b }
+input {
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border-radius:12px;
+  border:none;
+  background:#2a2a33;
+  color:white;
+  text-align:center;
+}
+.back { color:#8774e1; margin-bottom:10px; cursor:pointer }
 </style>
 </head>
 
 <body>
-<div id="app">⏳ Загрузка…</div>
+<div id="app">Загрузка…</div>
 
 <script>
-/* TELEGRAM */
+/* ==== TELEGRAM ==== */
 if (!window.Telegram?.WebApp) {
   document.body.innerHTML = "❌ Только через Telegram";
-  throw new Error("No Telegram");
+  throw "";
 }
 const tg = Telegram.WebApp;
 tg.expand();
 
-const app = document.getElementById("app");
-const user = tg.initDataUnsafe?.user;
+/* ==== SUPABASE ==== */
+const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";
 
-/* SUPABASE */
-const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co"; // ← ОБЯЗАТЕЛЬНО
-const SUPABASE_ANON_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";   // ← ОБЯЗАТЕЛЬНО
-
-const supabase = supabaseJs.createClient(
+const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-/* START */
+/* ==== USER ==== */
+const app = document.getElementById("app");
+const user = tg.initDataUnsafe?.user;
 if (!user) {
-  app.innerHTML = "<div class='card error'>❌ Нет данных Telegram</div>";
-  throw new Error("No user");
+  app.innerHTML = "❌ Нет пользователя Telegram";
+  throw "";
 }
 
-checkAdmin();
+/* ==== CHECK ADMIN ==== */
+let ROLE = null;
 
-/* CHECK ADMIN */
-async function checkAdmin() {
-  try {
-    const { data, error } = await supabase
-      .from("admins")
-      .select("id")
-      .eq("id", user.id)
-      .single();
+async function checkAccess() {
+  const { data, error } = await supabaseClient
+    .from("admins")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
-    if (error || !data) {
-      app.innerHTML = `
-        <div class="card error">
-          ⛔ У тебя нет доступа<br><br>
-          ID: ${user.id}
-        </div>
-      `;
-      return;
-    }
-
-    renderAdmin();
-
-  } catch (e) {
+  if (error || !data) {
     app.innerHTML = `
-      <div class="card error">
-        ❌ Ошибка Supabase<br>
-        ${e.message}
-      </div>
-    `;
+      <div class="card">
+        <h3>⛔ Нет доступа</h3>
+        <div>ID: ${user.id}</div>
+        <button onclick="location.reload()">Обновить</button>
+      </div>`;
+    return;
+  }
+
+  ROLE = data.role;
+  showPin();
+}
+
+/* ==== PIN ==== */
+const PIN_CODE = "2580";
+
+function showPin() {
+  app.innerHTML = `
+    <div class="card">
+      <h3>🔐 PIN</h3>
+      <input id="pin" type="password">
+      <button onclick="checkPin()">Войти</button>
+    </div>`;
+}
+
+function checkPin() {
+  if (document.getElementById("pin").value === PIN_CODE) {
+    renderMain();
+  } else {
+    alert("Неверный PIN");
   }
 }
 
-/* ADMIN UI */
-function renderAdmin() {
+/* ==== MAIN ==== */
+function renderMain() {
   app.innerHTML = `
     <div class="card">
-      <b>👑 BENTO ADMIN</b><br><br>
-      ${user.first_name}<br>
-      ID: ${user.id}<br><br>
-      <button onclick="tg.close()">🚪 Выйти</button>
+      <b>${user.first_name}</b>
+      <div>ID: ${user.id}</div>
+      <div>Роль: ${ROLE}</div>
     </div>
+
+    <div class="card">
+      <button onclick="openSection('Заявки')">📨 Заявки</button>
+      ${ROLE === "OWNER" ? `<button onclick="openAdmins()">👥 Админы</button>` : ``}
+      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
+      <button class="exit" onclick="tg.close()">🚪 Выйти</button>
+    </div>`;
+}
+
+/* ==== SECTIONS ==== */
+function openSection(name) {
+  app.innerHTML = `
+    <div class="back" onclick="renderMain()">← Назад</div>
+    <div class="card">${name}<br>В разработке</div>`;
+}
+
+/* ==== ADMINS ==== */
+async function openAdmins() {
+  const { data } = await supabaseClient
+    .from("admins")
+    .select("*")
+    .order("added_at", { ascending:false });
+
+  app.innerHTML = `
+    <div class="back" onclick="renderMain()">← Назад</div>
+    <div class="card">
+      <h3>👥 Админы</h3>
+      <input id="newId" placeholder="Telegram ID">
+      <button onclick="addAdmin()">Добавить</button>
+    </div>
+    ${data.map(a=>`
+      <div class="card">
+        ${a.id} — ${a.role}
+        <button class="exit" onclick="removeAdmin(${a.id})">Удалить</button>
+      </div>`).join("")}
   `;
 }
+
+async function addAdmin() {
+  const id = Number(document.getElementById("newId").value);
+  if (!id) return;
+
+  await supabaseClient.from("admins").insert({
+    id,
+    role:"ADMIN"
+  });
+
+  openAdmins();
+}
+
+async function removeAdmin(id) {
+  await supabaseClient.from("admins").delete().eq("id", id);
+  openAdmins();
+}
+
+/* ==== START ==== */
+checkAccess();
 </script>
 </body>
 </html>
