@@ -15,28 +15,15 @@
   --text:#fff;
   --muted:#9aa0a6;
   --danger:#ff6b6b;
+  --success:#4cd964;
+  --warn:#ffcc00;
 }
 
-* {
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont;
-}
+* { box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont; }
+body { margin:0; background:var(--bg); color:var(--text); }
+#app { padding:16px; }
 
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-}
-
-#app {
-  padding:16px;
-}
-
-.header {
-  font-size:20px;
-  font-weight:600;
-  margin-bottom:16px;
-}
+.header { font-size:20px; font-weight:600; margin-bottom:16px; }
 
 .card {
   background:var(--card);
@@ -45,10 +32,7 @@ body {
   margin-bottom:14px;
 }
 
-.user {
-  font-size:14px;
-  color:var(--muted);
-}
+.user { font-size:14px; color:var(--muted); }
 
 button {
   width:100%;
@@ -61,21 +45,11 @@ button {
   font-size:16px;
 }
 
-.menu button {
-  background:#2a2a33;
-  text-align:left;
-}
+.menu button { background:#2a2a33; text-align:left; }
 
-.exit {
-  background:#2a1d1d;
-  color:var(--danger);
-}
+.exit { background:#2a1d1d; color:var(--danger); }
 
-.back {
-  color:var(--accent);
-  margin-bottom:10px;
-  cursor:pointer;
-}
+.back { color:var(--accent); margin-bottom:10px; cursor:pointer; }
 
 input {
   width:100%;
@@ -86,9 +60,9 @@ input {
   background:#2a2a33;
   color:white;
   text-align:center;
-  letter-spacing:6px;
 }
 
+/* ===== WATERMARK ===== */
 #watermark {
   position:fixed;
   bottom:10px;
@@ -96,7 +70,25 @@ input {
   opacity:.15;
   font-size:12px;
   pointer-events:none;
-  z-index:9999;
+}
+
+/* ===== LOG UI ===== */
+.log {
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+.log.success { background:#1f2d24; color:var(--success); }
+.log.warn { background:#2b2a1f; color:var(--warn); }
+.log.danger { background:#2a1d1d; color:var(--danger); }
+
+.log small {
+  display:block;
+  opacity:.6;
+  font-size:11px;
+  margin-top:4px;
 }
 </style>
 </head>
@@ -105,83 +97,72 @@ input {
 <div id="app">Загрузка…</div>
 
 <script>
-/* ===== УРОВЕНЬ 1 — ТОЛЬКО TELEGRAM ===== */
+/* ===== TELEGRAM ONLY ===== */
 if (!window.Telegram || !Telegram.WebApp) {
-  document.body.innerHTML = "<h2 style='text-align:center;color:red'>❌ Только через Telegram</h2>";
-  throw new Error("Not Telegram");
+  document.body.innerHTML = "<h2 style='color:red;text-align:center'>❌ Только через Telegram</h2>";
+  throw new Error("No Telegram");
 }
-
-/* ===== УРОВЕНЬ 2 — АНТИ-ОТЛАДКА ===== */
-document.addEventListener("contextmenu", e => e.preventDefault());
-document.addEventListener("selectstart", e => e.preventDefault());
-document.addEventListener("keydown", e => {
-  if (e.key === "F12" || (e.ctrlKey && e.shiftKey) || (e.ctrlKey && e.key === "u")) {
-    e.preventDefault();
-  }
-});
 
 const tg = Telegram.WebApp;
 tg.expand();
 
 /* ===== НАСТРОЙКИ ===== */
 const OWNER_IDS = [8354848795];
-const ADMIN_IDS = [1111111111, 2222222222];
+const ADMIN_IDS = [1111111111];
 const PIN_CODE = "2580";
 const LOG_KEY = "BENTO_LOGS";
-/* ==================== */
 
+/* ===== USER ===== */
 const app = document.getElementById("app");
 const user = tg.initDataUnsafe?.user;
 
-/* ===== РОЛЬ ===== */
 let ROLE = null;
 if (user) {
   if (OWNER_IDS.includes(user.id)) ROLE = "OWNER";
   else if (ADMIN_IDS.includes(user.id)) ROLE = "ADMIN";
 }
 
-/* ===== ЛОГИ ===== */
-function addLog(action) {
+/* ===== LOG SYSTEM ===== */
+function addLog(type, text) {
   const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
   logs.unshift({
     time: new Date().toLocaleString(),
-    action,
-    role: ROLE,
-    id: user?.id,
-    name: user?.first_name
+    type,
+    text,
+    id: user.id,
+    role: ROLE
   });
   localStorage.setItem(LOG_KEY, JSON.stringify(logs.slice(0, 100)));
 }
 
-/* ===== АВТОВЫХОД 3 МИН ===== */
-let idleTimer;
-function resetTimer() {
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => {
-    addLog("AUTO_EXIT");
+/* ===== AUTO EXIT ===== */
+let idle;
+function resetIdle() {
+  clearTimeout(idle);
+  idle = setTimeout(() => {
+    addLog("danger", "⏱ Автовыход по бездействию");
     tg.close();
   }, 180000);
 }
-["click","touchstart","keydown"].forEach(e => document.addEventListener(e, resetTimer));
-resetTimer();
+["click","keydown","touchstart"].forEach(e => document.addEventListener(e, resetIdle));
+resetIdle();
 
-/* ===== ПРОВЕРКА ДОСТУПА ===== */
+/* ===== ACCESS ===== */
 if (!user || !ROLE) {
   app.innerHTML = "<div class='card'>⛔ Нет доступа</div>";
   tg.close();
 } else {
-  addLog("OPEN_PANEL");
+  addLog("success", "🚀 Вход в админ-панель");
   showPin();
 }
 
 /* ===== PIN ===== */
 function showPin() {
   app.innerHTML = `
-    <div class="header">🔐 Введите PIN</div>
+    <div class="header">🔐 PIN</div>
     <div class="card">
-      <input id="pin" type="password" maxlength="6" />
+      <input id="pin" type="password" />
       <button onclick="checkPin()">Войти</button>
-      <div id="error" style="color:#ff6b6b"></div>
     </div>
   `;
 }
@@ -189,12 +170,12 @@ function showPin() {
 function checkPin() {
   const v = document.getElementById("pin").value;
   if (v === PIN_CODE) {
-    addLog("PIN_OK");
+    addLog("success", "🔓 PIN принят");
     renderMain();
     addWatermark();
   } else {
-    addLog("PIN_FAIL");
-    document.getElementById("error").innerText = "Неверный PIN";
+    addLog("danger", "❌ Неверный PIN");
+    alert("Неверный PIN");
   }
 }
 
@@ -206,46 +187,51 @@ function addWatermark() {
   document.body.appendChild(wm);
 }
 
-/* ===== МЕНЮ ===== */
+/* ===== MAIN ===== */
 function renderMain() {
   app.innerHTML = `
     <div class="header">👑 BENTO ADMIN</div>
+
     <div class="card">
       <b>${user.first_name}</b>
       <div class="user">ID: ${user.id}</div>
       <div class="user">Роль: ${ROLE}</div>
     </div>
+
     <div class="card menu">
       <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${ROLE==="OWNER" ? `<button onclick="openSection('Админы')">👥 Админы</button>
-      <button onclick="openSection('Логи')">📜 Логи</button>` : ""}
-      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-      <button class="exit" onclick="addLog('EXIT'); tg.close()">🚪 Выйти</button>
+      ${ROLE==="OWNER" ? `<button onclick="openLogs()">📜 Логи</button>` : ""}
+      <button class="exit" onclick="addLog('warn','🚪 Выход'); tg.close()">Выйти</button>
     </div>
   `;
 }
 
-/* ===== РАЗДЕЛЫ ===== */
-function openSection(name) {
-  addLog("OPEN_" + name);
-
-  if (name === "Логи" && ROLE === "OWNER") {
-    const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
-    app.innerHTML = `
-      <div class="back" onclick="renderMain()">← Назад</div>
-      <div class="card">
-        ${logs.map(l => `<div style="font-size:12px;opacity:.8">
-        ${l.time} — ${l.action} — ${l.role} (${l.id})
-        </div>`).join("")}
-      </div>
-    `;
-    return;
-  }
+/* ===== LOG UI ===== */
+function openLogs() {
+  const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
 
   app.innerHTML = `
     <div class="back" onclick="renderMain()">← Назад</div>
-    <div class="card">${name} — в разработке</div>
+    <div class="header">📜 Логи</div>
+
+    <button onclick="clearLogs()" style="background:#2a1d1d;color:#ff6b6b">
+      🧹 Очистить логи
+    </button>
+
+    ${logs.map(l => `
+      <div class="log ${l.type}">
+        ${l.text}
+        <small>${l.time} • ${l.role} • ID ${l.id}</small>
+      </div>
+    `).join("")}
   `;
+}
+
+function clearLogs() {
+  if (confirm("Очистить все логи?")) {
+    localStorage.removeItem(LOG_KEY);
+    openLogs();
+  }
 }
 </script>
 </body>
