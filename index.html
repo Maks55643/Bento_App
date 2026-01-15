@@ -5,8 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BENTO Admin</title>
 
+<!-- Telegram -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Montserrat -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -19,7 +25,11 @@
   --danger:#ff6b6b;
 }
 
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont}
+/* ===== GLOBAL FONT ===== */
+*{
+  box-sizing:border-box;
+  font-family:'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
 body{
   margin:0;
@@ -102,8 +112,15 @@ body{
   cursor:pointer;
 }
 
-.key:active{transform:scale(.96)}
-.key.empty{background:none;pointer-events:none}
+.key:active{
+  transform:scale(.96);
+  background:#26283a;
+}
+
+.key.empty{
+  background:none;
+  pointer-events:none;
+}
 
 /* ===== MENU ===== */
 .panel{width:100%;max-width:380px}
@@ -116,6 +133,7 @@ button{
   background:var(--accent);
   color:white;
   font-size:16px;
+  font-weight:600;
   margin-top:12px;
 }
 
@@ -129,6 +147,7 @@ button.danger{
   text-align:left;
   cursor:pointer;
   margin-bottom:12px;
+  font-weight:500;
 }
 </style>
 </head>
@@ -171,7 +190,7 @@ function resetIdle(){
 async function start(){
   resetIdle();
   const {data} = await sb.from("admins").select("*").eq("id",user.id).single();
-  if(!data) return app.innerHTML="⛔ У вас НЕТ доступа";
+  if(!data) return app.innerHTML="⛔ Нет доступа";
   ROLE = data.role;
   pinScreen();
 }
@@ -238,7 +257,6 @@ function menu(){
   `;
 }
 
-/* ===== SECTION ===== */
 function openSection(name){
   resetIdle();
   app.innerHTML=`
@@ -252,7 +270,6 @@ function openSection(name){
   `;
 }
 
-/* ===== START ===== */
 start();
 </script>
 </body>
