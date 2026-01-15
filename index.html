@@ -38,10 +38,10 @@ body{
 /* ===== GLASS ===== */
 .card{
   background:var(--glass);
-  backdrop-filter:blur(16px);
+  backdrop-filter:blur(20px);
   border:1px solid var(--stroke);
-  border-radius:24px;
-  padding:22px;
+  border-radius:28px;
+  padding:24px;
   width:100%;
   max-width:360px;
   text-align:center;
@@ -49,58 +49,69 @@ body{
 
 /* ===== USER ===== */
 .avatar{
-  width:84px;
-  height:84px;
+  width:90px;
+  height:90px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:36px;
+  font-size:38px;
   font-weight:700;
-  margin:0 auto 12px;
+  margin:0 auto 14px;
 }
 
-.name{font-size:20px;font-weight:600}
-.role{color:var(--muted);margin-bottom:18px}
+.name{font-size:22px;font-weight:600}
+.role{color:var(--muted);margin-bottom:22px}
 
-/* ===== PIN DOTS ===== */
+/* ===== iOS DOTS ===== */
 .dots{
   display:flex;
   justify-content:center;
-  gap:12px;
-  margin:20px 0;
+  gap:14px;
+  margin:26px 0;
 }
 
 .dot{
-  width:14px;
-  height:14px;
+  width:12px;
+  height:12px;
   border-radius:50%;
-  background:#2a2b3a;
-  transition:.2s;
+  background:#2b2c3a;
+  transition:.25s;
 }
 
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
 
-/* ===== KEYPAD ===== */
+/* ===== iOS KEYPAD ===== */
 .keypad{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:14px;
+  gap:16px;
+  margin-top:10px;
 }
 
 .key{
-  padding:18px;
-  border-radius:18px;
-  background:#242533;
-  font-size:20px;
+  height:64px;
+  border-radius:22px;
+  background:#1f2030;
+  font-size:22px;
   font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
 }
 
-.key:active{transform:scale(.95)}
-.key.empty{background:none;pointer-events:none}
+.key:active{
+  transform:scale(.96);
+  background:#26283a;
+}
+
+.key.empty{
+  background:none;
+  pointer-events:none;
+}
 
 /* ===== MAIN ===== */
 .panel{width:100%;max-width:380px}
@@ -120,8 +131,6 @@ button.danger{
   background:#2a1d1d;
   color:var(--danger);
 }
-
-.back{color:var(--accent);margin-bottom:12px;cursor:pointer}
 </style>
 </head>
 
@@ -204,7 +213,7 @@ function press(k){
   error = false;
 
   if(input.length===4){
-    setTimeout(checkPin,150);
+    setTimeout(checkPin,180);
     return;
   }
   pinScreen();
