@@ -89,12 +89,11 @@ input {
   letter-spacing:6px;
 }
 
-/* 👁️ WATERMARK */
 #watermark {
   position:fixed;
   bottom:10px;
   right:10px;
-  opacity:0.15;
+  opacity:.15;
   font-size:12px;
   pointer-events:none;
   z-index:9999;
@@ -106,28 +105,17 @@ input {
 <div id="app">Загрузка…</div>
 
 <script>
-/* ================= 🔒 УРОВЕНЬ 1 — ТОЛЬКО TELEGRAM ================= */
+/* ===== УРОВЕНЬ 1 — ТОЛЬКО TELEGRAM ===== */
 if (!window.Telegram || !Telegram.WebApp) {
-  document.body.innerHTML = `
-    <h2 style="color:red;text-align:center;margin-top:40px">
-      ❌ Доступ запрещён
-    </h2>
-    <p style="text-align:center">
-      Открой панель только через Telegram
-    </p>
-  `;
+  document.body.innerHTML = "<h2 style='text-align:center;color:red'>❌ Только через Telegram</h2>";
   throw new Error("Not Telegram");
 }
 
-/* ================= 🕵️‍♂️ УРОВЕНЬ 2 — АНТИ-ОТЛАДКА ================= */
+/* ===== УРОВЕНЬ 2 — АНТИ-ОТЛАДКА ===== */
 document.addEventListener("contextmenu", e => e.preventDefault());
 document.addEventListener("selectstart", e => e.preventDefault());
 document.addEventListener("keydown", e => {
-  if (
-    e.key === "F12" ||
-    (e.ctrlKey && e.shiftKey) ||
-    (e.ctrlKey && e.key === "u")
-  ) {
+  if (e.key === "F12" || (e.ctrlKey && e.shiftKey) || (e.ctrlKey && e.key === "u")) {
     e.preventDefault();
   }
 });
@@ -135,88 +123,82 @@ document.addEventListener("keydown", e => {
 const tg = Telegram.WebApp;
 tg.expand();
 
-/* ================= НАСТРОЙКИ ================= */
-
-// OWNER — ТОЛЬКО ТЫ
+/* ===== НАСТРОЙКИ ===== */
 const OWNER_IDS = [8354848795];
-
-// АДМИНЫ (добавляй сюда)
-const ADMIN_IDS = [
-  1111111111,
-  2222222222
-];
-
+const ADMIN_IDS = [1111111111, 2222222222];
 const PIN_CODE = "2580";
-
-/* ============================================= */
+const LOG_KEY = "BENTO_LOGS";
+/* ==================== */
 
 const app = document.getElementById("app");
 const user = tg.initDataUnsafe?.user;
 
-/* ================= ⏱️ УРОВЕНЬ 4 — АВТОВЫХОД ================= */
+/* ===== РОЛЬ ===== */
+let ROLE = null;
+if (user) {
+  if (OWNER_IDS.includes(user.id)) ROLE = "OWNER";
+  else if (ADMIN_IDS.includes(user.id)) ROLE = "ADMIN";
+}
+
+/* ===== ЛОГИ ===== */
+function addLog(action) {
+  const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+  logs.unshift({
+    time: new Date().toLocaleString(),
+    action,
+    role: ROLE,
+    id: user?.id,
+    name: user?.first_name
+  });
+  localStorage.setItem(LOG_KEY, JSON.stringify(logs.slice(0, 100)));
+}
+
+/* ===== АВТОВЫХОД 3 МИН ===== */
 let idleTimer;
 function resetTimer() {
   clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => tg.close(), 3 * 60 * 1000);
+  idleTimer = setTimeout(() => {
+    addLog("AUTO_EXIT");
+    tg.close();
+  }, 180000);
 }
-["click","touchstart","keydown"].forEach(e =>
-  document.addEventListener(e, resetTimer)
-);
+["click","touchstart","keydown"].forEach(e => document.addEventListener(e, resetTimer));
 resetTimer();
 
-/* ================= РОЛЬ ================= */
-let ROLE = null;
-
-if (user) {
-  if (OWNER_IDS.includes(Number(user.id))) ROLE = "OWNER";
-  else if (ADMIN_IDS.includes(Number(user.id))) ROLE = "ADMIN";
-}
-
-/* ================= ПРОВЕРКА ДОСТУПА ================= */
-if (!user) {
-  app.innerHTML = `
-    <div class="header">❌ Ошибка</div>
-    <div class="card">Открой панель через кнопку в боте</div>
-  `;
+/* ===== ПРОВЕРКА ДОСТУПА ===== */
+if (!user || !ROLE) {
+  app.innerHTML = "<div class='card'>⛔ Нет доступа</div>";
   tg.close();
-
-} else if (!ROLE) {
-  app.innerHTML = `
-    <div class="header">⛔ Доступ запрещён</div>
-    <div class="card">
-      <div>ID: ${user.id}</div>
-      <div>Нет прав администратора</div>
-    </div>
-  `;
-  tg.close();
-
 } else {
+  addLog("OPEN_PANEL");
   showPin();
 }
 
-/* ================= PIN ================= */
+/* ===== PIN ===== */
 function showPin() {
   app.innerHTML = `
     <div class="header">🔐 Введите PIN</div>
     <div class="card">
-      <input id="pin" type="password" inputmode="numeric" maxlength="6" />
+      <input id="pin" type="password" maxlength="6" />
       <button onclick="checkPin()">Войти</button>
-      <div id="error" style="color:#ff6b6b;margin-top:8px"></div>
+      <div id="error" style="color:#ff6b6b"></div>
     </div>
   `;
 }
 
 function checkPin() {
-  const value = document.getElementById("pin").value;
-  if (value === PIN_CODE) {
+  const v = document.getElementById("pin").value;
+  if (v === PIN_CODE) {
+    addLog("PIN_OK");
     renderMain();
     addWatermark();
   } else {
+    addLog("PIN_FAIL");
     document.getElementById("error").innerText = "Неверный PIN";
   }
 }
 
-/* ================= 👁️ WATERMARK ================= */
+/* ===== WATERMARK ===== */
 function addWatermark() {
   const wm = document.createElement("div");
   wm.id = "watermark";
@@ -224,50 +206,47 @@ function addWatermark() {
   document.body.appendChild(wm);
 }
 
-/* ================= ГЛАВНОЕ МЕНЮ ================= */
+/* ===== МЕНЮ ===== */
 function renderMain() {
-  const adminButton = ROLE === "OWNER"
-    ? `<button onclick="openSection('Админы')">👥 Админы</button>`
-    : ``;
-
   app.innerHTML = `
     <div class="header">👑 BENTO ADMIN</div>
-
     <div class="card">
       <b>${user.first_name}</b>
       <div class="user">ID: ${user.id}</div>
       <div class="user">Роль: ${ROLE}</div>
     </div>
-
     <div class="card menu">
       <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${adminButton}
-      <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
+      ${ROLE==="OWNER" ? `<button onclick="openSection('Админы')">👥 Админы</button>
+      <button onclick="openSection('Логи')">📜 Логи</button>` : ""}
       <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-      <button class="exit" onclick="tg.close()">🚪 Выйти</button>
+      <button class="exit" onclick="addLog('EXIT'); tg.close()">🚪 Выйти</button>
     </div>
   `;
 }
 
-/* ================= РАЗДЕЛЫ ================= */
-window.openSection = function(name) {
+/* ===== РАЗДЕЛЫ ===== */
+function openSection(name) {
+  addLog("OPEN_" + name);
 
-  if (name === "Админы" && ROLE !== "OWNER") {
+  if (name === "Логи" && ROLE === "OWNER") {
+    const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
     app.innerHTML = `
-      <div class="header">⛔ Доступ запрещён</div>
-      <div class="card">Только для Owner</div>
+      <div class="back" onclick="renderMain()">← Назад</div>
+      <div class="card">
+        ${logs.map(l => `<div style="font-size:12px;opacity:.8">
+        ${l.time} — ${l.action} — ${l.role} (${l.id})
+        </div>`).join("")}
+      </div>
     `;
     return;
   }
 
   app.innerHTML = `
     <div class="back" onclick="renderMain()">← Назад</div>
-    <div class="card">
-      <b>${name}</b><br>
-      Раздел в разработке
-    </div>
+    <div class="card">${name} — в разработке</div>
   `;
-};
+}
 </script>
 </body>
 </html>
