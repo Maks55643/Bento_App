@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>BENTO Admin Panel</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -47,16 +47,16 @@ button {
 
 .menu button { background:#2a2a33; text-align:left; }
 .exit { background:#2a1d1d; color:var(--danger); }
-.back { color:var(--accent); margin-bottom:12px; cursor:pointer; }
+.back { color:var(--accent); margin-bottom:10px; cursor:pointer; }
 
 input {
   width:100%;
-  padding:14px;
-  border-radius:12px;
+  padding:16px;
+  font-size:20px;
+  border-radius:14px;
   border:none;
   background:#2a2a33;
   color:white;
-  font-size:16px;
   text-align:center;
 }
 
@@ -70,7 +70,7 @@ input {
   pointer-events:none;
 }
 
-/* LOG */
+/* LOGS */
 .log {
   padding:12px;
   border-radius:12px;
@@ -80,12 +80,7 @@ input {
 .log.success { background:#1f2d24; color:var(--success); }
 .log.warn { background:#2b2a1f; color:var(--warn); }
 .log.danger { background:#2a1d1d; color:var(--danger); }
-.log small {
-  display:block;
-  opacity:.6;
-  font-size:11px;
-  margin-top:4px;
-}
+.log small { display:block; opacity:.6; font-size:11px; margin-top:4px; }
 </style>
 </head>
 
@@ -103,30 +98,19 @@ const tg = Telegram.WebApp;
 tg.expand();
 
 /* ===== НАСТРОЙКИ ===== */
-const OWNER_IDS = [8354848795]; // ТЫ
+const OWNER_IDS = [8354848795];       // OWNER
+const ADMIN_IDS = [1695480296];       // ADMINS
 const PIN_CODE = "2580";
-
-const ADMIN_KEY = "BENTO_ADMINS";
 const LOG_KEY = "BENTO_LOGS";
-
-/* ===== ADMIN STORAGE ===== */
-function getAdmins() {
-  return JSON.parse(localStorage.getItem(ADMIN_KEY) || "[]");
-}
-function setAdmins(arr) {
-  localStorage.setItem(ADMIN_KEY, JSON.stringify(arr));
-}
 
 /* ===== USER ===== */
 const app = document.getElementById("app");
 const user = tg.initDataUnsafe?.user;
 
 let ROLE = null;
-let ADMINS = getAdmins();
-
 if (user) {
   if (OWNER_IDS.includes(user.id)) ROLE = "OWNER";
-  else if (ADMINS.includes(user.id)) ROLE = "ADMIN";
+  else if (ADMIN_IDS.includes(user.id)) ROLE = "ADMIN";
 }
 
 /* ===== LOG SYSTEM ===== */
@@ -136,8 +120,8 @@ function addLog(type, text) {
     time: new Date().toLocaleString(),
     type,
     text,
-    id: user.id,
-    role: ROLE
+    id: user?.id || "—",
+    role: ROLE || "GUEST"
   });
   localStorage.setItem(LOG_KEY, JSON.stringify(logs.slice(0,100)));
 }
@@ -147,28 +131,37 @@ let idle;
 function resetIdle() {
   clearTimeout(idle);
   idle = setTimeout(() => {
-    addLog("danger", "⏱ Автовыход по бездействию");
+    addLog("warn","⏱ Автовыход по бездействию");
     tg.close();
   }, 180000);
 }
 ["click","keydown","touchstart"].forEach(e => document.addEventListener(e, resetIdle));
 resetIdle();
 
-/* ===== ACCESS ===== */
+/* ===== ACCESS CHECK (FIXED BUG HERE) ===== */
 if (!user || !ROLE) {
-  app.innerHTML = "<div class='card'>⛔ Нет доступа</div>";
-  tg.close();
-} else {
-  addLog("success", "🚀 Вход в панель");
-  showPin();
+  app.innerHTML = `
+    <div class="header">⛔ Нет доступа</div>
+    <div class="card">
+      <div>Тебе не выдана админка</div>
+      <div class="user">ID: ${user?.id || "—"}</div>
+      <br>
+      <button onclick="location.reload()">🔄 Обновить после выдачи прав</button>
+    </div>
+  `;
+  addLog("warn","⛔ Попытка входа без прав");
+  throw new Error("No access");
 }
+
+addLog("success","🚀 Вход в админ-панель");
+showPin();
 
 /* ===== PIN ===== */
 function showPin() {
   app.innerHTML = `
-    <div class="header">🔐 PIN</div>
+    <div class="header">🔐 Введите PIN</div>
     <div class="card">
-      <input id="pin" type="password" maxlength="6">
+      <input id="pin" type="password" />
       <button onclick="checkPin()">Войти</button>
     </div>
   `;
@@ -176,11 +169,11 @@ function showPin() {
 
 function checkPin() {
   if (document.getElementById("pin").value === PIN_CODE) {
-    addLog("success", "🔓 PIN принят");
+    addLog("success","🔓 PIN принят");
     renderMain();
     addWatermark();
   } else {
-    addLog("danger", "❌ Неверный PIN");
+    addLog("danger","❌ Неверный PIN");
     alert("Неверный PIN");
   }
 }
@@ -206,53 +199,21 @@ function renderMain() {
 
     <div class="card menu">
       <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${ROLE === "OWNER" ? `<button onclick="openAdmins()">👥 Админы</button>` : ``}
+      ${ROLE==="OWNER" ? `<button onclick="openSection('Админы')">👥 Админы</button>` : ``}
       <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
       <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-      ${ROLE === "OWNER" ? `<button onclick="openLogs()">📜 Логи</button>` : ``}
+      ${ROLE==="OWNER" ? `<button onclick="openLogs()">📜 Логи действий</button>` : ``}
       <button class="exit" onclick="addLog('warn','🚪 Выход'); tg.close()">🚪 Выйти</button>
     </div>
   `;
 }
 
-/* ===== ADMINS UI ===== */
-function openAdmins() {
-  ADMINS = getAdmins();
-
+/* ===== SECTIONS ===== */
+function openSection(name) {
   app.innerHTML = `
     <div class="back" onclick="renderMain()">← Назад</div>
-    <div class="header">👥 Админы</div>
-
-    <div class="card">
-      <input id="newAdmin" placeholder="Telegram ID">
-      <button onclick="addAdmin()">➕ Добавить админа</button>
-    </div>
-
-    ${ADMINS.map(id => `
-      <div class="card">
-        ID: ${id}
-        <button class="exit" onclick="removeAdmin(${id})">❌ Удалить</button>
-      </div>
-    `).join("")}
+    <div class="card">${name}<br>В разработке</div>
   `;
-}
-
-function addAdmin() {
-  const id = Number(document.getElementById("newAdmin").value);
-  if (!id || ADMINS.includes(id)) return alert("Ошибка ID");
-
-  ADMINS.push(id);
-  setAdmins(ADMINS);
-  addLog("success", `➕ Добавлен админ ${id}`);
-  openAdmins();
-}
-
-function removeAdmin(id) {
-  if (!confirm("Удалить админа?")) return;
-  ADMINS = ADMINS.filter(a => a !== id);
-  setAdmins(ADMINS);
-  addLog("warn", `❌ Удалён админ ${id}`);
-  openAdmins();
 }
 
 /* ===== LOG UI ===== */
@@ -261,7 +222,8 @@ function openLogs() {
   app.innerHTML = `
     <div class="back" onclick="renderMain()">← Назад</div>
     <div class="header">📜 Логи</div>
-    ${logs.map(l => `
+    <button onclick="clearLogs()" class="exit">🧹 Очистить логи</button>
+    ${logs.map(l=>`
       <div class="log ${l.type}">
         ${l.text}
         <small>${l.time} • ${l.role} • ID ${l.id}</small>
@@ -270,11 +232,11 @@ function openLogs() {
   `;
 }
 
-function openSection(name) {
-  app.innerHTML = `
-    <div class="back" onclick="renderMain()">← Назад</div>
-    <div class="card"><b>${name}</b><br>В разработке</div>
-  `;
+function clearLogs() {
+  if (confirm("Очистить логи?")) {
+    localStorage.removeItem(LOG_KEY);
+    openLogs();
+  }
 }
 </script>
 </body>
