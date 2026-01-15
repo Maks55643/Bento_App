@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>BENTO Admin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -19,8 +18,13 @@ body {
 #app { padding:16px }
 .card {
   background:#1c1c22;
-  border-radius:14px;
+  border-radius:16px;
   padding:16px;
+  margin-bottom:14px;
+}
+.header {
+  font-size:20px;
+  font-weight:600;
   margin-bottom:12px;
 }
 button {
@@ -28,95 +32,150 @@ button {
   padding:14px;
   margin-top:10px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   background:#8774e1;
   color:white;
   font-size:16px;
 }
-.error {
+.exit {
+  background:#2a1d1d;
   color:#ff6b6b;
-  white-space:pre-wrap;
+}
+input {
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#2a2a33;
+  color:white;
+  font-size:18px;
+  text-align:center;
+}
+.admin {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+}
+.small {
+  opacity:.6;
+  font-size:12px;
 }
 </style>
 </head>
 
 <body>
-<div id="app">⏳ Инициализация…</div>
+<div id="app">⏳ Загрузка…</div>
 
 <script>
-/* ===== SAFE ERROR OUTPUT ===== */
-function fatal(msg) {
-  document.getElementById("app").innerHTML =
-    `<div class="card error">❌ ОШИБКА\n\n${msg}</div>`;
-  throw new Error(msg);
-}
-
 /* ===== TELEGRAM ===== */
-if (!window.Telegram || !Telegram.WebApp) {
-  fatal("Не Telegram WebApp");
+if (!window.Telegram?.WebApp) {
+  document.body.innerHTML = "❌ Только Telegram";
+  throw new Error();
 }
 const tg = Telegram.WebApp;
 tg.expand();
-
-/* ===== USER ===== */
-const user = tg.initDataUnsafe?.user;
-if (!user) fatal("Нет tg.initDataUnsafe.user");
+const user = tg.initDataUnsafe.user;
 
 /* ===== SUPABASE ===== */
-if (typeof supabase === "undefined") {
-  fatal("Supabase SDK не загрузился");
-}
-
 const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let supabaseClient;
-try {
-  supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-} catch (e) {
-  fatal("createClient ошибка:\n" + e.message);
-}
-
-/* ===== CHECK ACCESS ===== */
+/* ===== STATE ===== */
+let ROLE = null;
 const app = document.getElementById("app");
-app.innerText = "🔎 Проверка доступа…";
 
+/* ===== ACCESS ===== */
 async function checkAccess() {
-  let res;
-  try {
-    res = await supabaseClient
-      .from("admins")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-  } catch (e) {
-    fatal("Запрос упал:\n" + e.message);
-  }
+  const { data, error } = await sb
+    .from("admins")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
-  if (res.error) {
-    fatal("Supabase error:\n" + res.error.message);
-  }
-
-  if (!res.data) {
+  if (error || !data) {
     app.innerHTML = `
       <div class="card">
         ⛔ Нет доступа<br>
-        ID: ${user.id}
+        <span class="small">ID: ${user.id}</span>
       </div>`;
     return;
   }
 
-  app.innerHTML = `
-    <div class="card">
-      ✅ ДОСТУП ЕСТЬ<br><br>
-      ID: ${user.id}<br>
-      Роль: ${res.data.role}
-    </div>`;
+  ROLE = data.role;
+  renderMain();
 }
 
+/* ===== MAIN ===== */
+function renderMain() {
+  app.innerHTML = `
+    <div class="header">👑 BENTO ADMIN</div>
+
+    <div class="card">
+      <b>${user.first_name}</b><br>
+      <span class="small">ID: ${user.id}</span><br>
+      <span class="small">Роль: ${ROLE}</span>
+    </div>
+
+    <div class="card">
+      ${ROLE === "OWNER"
+        ? `<button onclick="openAdmins()">👥 Админы</button>`
+        : ``}
+      <button class="exit" onclick="tg.close()">🚪 Выйти</button>
+    </div>
+  `;
+}
+
+/* ===== ADMINS ===== */
+async function openAdmins() {
+  const { data } = await sb.from("admins").select("*").order("added_at");
+
+  app.innerHTML = `
+    <div class="header">👥 Админы</div>
+
+    <div class="card">
+      <input id="newId" placeholder="Telegram ID">
+      <button onclick="addAdmin()">➕ Добавить ADMIN</button>
+    </div>
+
+    <div class="card">
+      ${data.map(a => `
+        <div class="admin">
+          <div>
+            <b>${a.id}</b><br>
+            <span class="small">${a.role}</span>
+          </div>
+          ${a.role !== "OWNER"
+            ? `<button onclick="removeAdmin(${a.id})">❌</button>`
+            : ``}
+        </div>
+      `).join("")}
+    </div>
+
+    <button onclick="renderMain()">← Назад</button>
+  `;
+}
+
+async function addAdmin() {
+  const id = document.getElementById("newId").value;
+  if (!id) return alert("ID?");
+
+  await sb.from("admins").insert({
+    id: Number(id),
+    role: "ADMIN"
+  });
+
+  openAdmins();
+}
+
+async function removeAdmin(id) {
+  if (!confirm("Удалить?")) return;
+  await sb.from("admins").delete().eq("id", id);
+  openAdmins();
+}
+
+/* ===== START ===== */
 checkAccess();
 </script>
 </body>
