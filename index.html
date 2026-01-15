@@ -5,13 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BENTO Admin</title>
 
-<!-- Telegram -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Montserrat -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -25,11 +20,7 @@
   --danger:#ff6b6b;
 }
 
-/* ===== GLOBAL ===== */
-*{
-  box-sizing:border-box;
-  font-family:'Montserrat',sans-serif;
-}
+*{box-sizing:border-box;font-family:'Montserrat',sans-serif}
 
 body{
   margin:0;
@@ -59,66 +50,34 @@ body{
 
 /* ===== USER ===== */
 .avatar{
-  width:90px;
-  height:90px;
-  border-radius:50%;
+  width:90px;height:90px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:38px;
-  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;font-weight:700;
   margin:0 auto 14px;
 }
 
 .name{font-size:22px;font-weight:600}
 .role{color:var(--muted);margin-bottom:22px}
 
-/* ===== PIN DOTS ===== */
-.dots{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  margin:26px 0;
-}
-
-.dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:#2b2c3a;
-}
-
+/* ===== PIN ===== */
+.dots{display:flex;justify-content:center;gap:14px;margin:26px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
 
-/* ===== KEYPAD ===== */
 .keypad{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:16px;
 }
-
 .key{
-  height:64px;
-  border-radius:22px;
+  height:64px;border-radius:22px;
   background:#1f2030;
-  font-size:22px;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+  font-size:22px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
 }
-
-.key:active{
-  transform:scale(.96);
-}
-
-.key.empty{
-  background:none;
-  pointer-events:none;
-}
+.key.empty{background:none}
 
 /* ===== PANEL ===== */
 .panel{width:100%;max-width:380px}
@@ -144,19 +103,44 @@ button.danger{
   color:var(--accent);
   cursor:pointer;
   text-align:left;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 
-/* ===== ADMINS ===== */
+/* ===== ADMINS (NEW DESIGN) ===== */
+.admin-input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  background:#1f2030;
+  color:white;
+  font-size:15px;
+  outline:none;
+}
+
+.admin-input::placeholder{color:var(--muted)}
+
 .admin{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px;
-  background:#1f2030;
-  border-radius:14px;
-  margin-top:10px;
-  font-size:14px;
+  padding:14px 16px;
+  background:#1b1c28;
+  border-radius:18px;
+  margin-top:12px;
+}
+
+.admin-info{
+  text-align:left;
+}
+
+.admin-id{font-weight:600;font-size:14px}
+.admin-role{font-size:12px;color:var(--muted)}
+
+.admin-del{
+  color:var(--danger);
+  font-size:18px;
+  cursor:pointer;
 }
 
 /* ===== WELCOME ===== */
@@ -168,28 +152,14 @@ button.danger{
 }
 
 .welcome-avatar{
-  width:110px;
-  height:110px;
-  border-radius:50%;
+  width:110px;height:110px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:44px;
-  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;font-weight:700;
   margin-bottom:18px;
-  animation:pop .6s ease;
 }
 
-@keyframes fade{
-  from{opacity:0}
-  to{opacity:1}
-}
-
-@keyframes pop{
-  from{transform:scale(.7);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
+@keyframes fade{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 
@@ -197,64 +167,45 @@ button.danger{
 <div id="app">⏳</div>
 
 <script>
-/* ===== TELEGRAM ===== */
 const tg = Telegram.WebApp;
 tg.expand();
 const user = tg.initDataUnsafe.user;
 
-/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
   "https://duqqpuitipndkghpqupb.supabase.co",
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
 
-/* ===== CONFIG ===== */
-const PIN = "2580";
-let ROLE = null;
-let input = "";
-let error = false;
-const app = document.getElementById("app");
+const PIN="2580";
+let ROLE=null,input="",error=false;
+const app=document.getElementById("app");
 
-/* ===== AUTO EXIT ===== */
+/* AUTO EXIT */
 let idle;
 function resetIdle(){
   clearTimeout(idle);
-  idle = setTimeout(()=>tg.close(),180000);
+  idle=setTimeout(()=>tg.close(),180000);
 }
 ["click","touchstart","keydown"].forEach(e=>document.addEventListener(e,resetIdle));
 
-/* ===== START ===== */
 async function start(){
   resetIdle();
-  const {data} = await sb.from("admins").select("*").eq("id",user.id).single();
+  const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE = data.role;
+  ROLE=data.role;
   pin();
 }
 
-/* ===== PIN ===== */
+/* PIN */
 function pin(){
   app.innerHTML=`
-    <div class="card">
-      <div class="avatar">${user.first_name[0]}</div>
-      <div class="name">${user.first_name}</div>
-      <div class="role">${ROLE}</div>
-
-      <div class="dots">
-        ${[0,1,2,3].map(i=>`
-          <div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>
-        `).join("")}
-      </div>
-
-      <div class="keypad">
-        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
-          k==="" 
-          ? `<div class="key empty"></div>`
-          : `<div class="key" onclick="press('${k}')">${k}</div>`
-        ).join("")}
-      </div>
-    </div>
-  `;
+  <div class="card">
+    <div class="avatar">${user.first_name[0]}</div>
+    <div class="name">${user.first_name}</div>
+    <div class="role">${ROLE}</div>
+    <div class="dots">${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}</div>
+    <div class="keypad">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?`<div class="key empty"></div>`:`<div class="key" onclick="press('${k}')">${k}</div>`).join("")}</div>
+  </div>`;
 }
 
 function press(k){
@@ -268,71 +219,62 @@ function press(k){
 
 function checkPin(){
   if(input===PIN) welcome();
-  else{
-    input="";
-    error=true;
-    pin();
-  }
+  else{input="";error=true;pin();}
 }
 
-/* ===== WELCOME ===== */
+/* WELCOME */
 function welcome(){
   app.innerHTML=`
-    <div class="panel">
-      <div class="card welcome">
-        <div class="welcome-avatar">${user.first_name[0]}</div>
-        <h2>Добро пожаловать</h2>
-        <p style="color:var(--muted)">BENTO ADMIN PANEL</p>
-      </div>
+  <div class="panel">
+    <div class="card welcome">
+      <div class="welcome-avatar">${user.first_name[0]}</div>
+      <h2>Добро пожаловать</h2>
+      <p style="color:var(--muted)">BENTO ADMIN PANEL</p>
     </div>
-  `;
+  </div>`;
   setTimeout(menu,1800);
 }
 
-/* ===== MENU ===== */
+/* MENU */
 function menu(){
-  resetIdle();
   app.innerHTML=`
-    <div class="panel">
-      <div class="card">
-        <h2>👑 BENTO ADMIN</h2>
-        <p>${user.first_name} • ${ROLE}</p>
-
-        <button>📨 Заявки</button>
-        ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
-        <button>⛔ Блэклист</button>
-        <button>⚙️ Настройки</button>
-        <button class="danger" onclick="tg.close()">🚪 Выйти</button>
-      </div>
+  <div class="panel">
+    <div class="card">
+      <h2>👑 BENTO ADMIN</h2>
+      <p>${user.first_name} • ${ROLE}</p>
+      ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
+      <button class="danger" onclick="tg.close()">🚪 Выйти</button>
     </div>
-  `;
+  </div>`;
 }
 
-/* ===== ADMINS ===== */
+/* ADMINS (DESIGN ONLY) */
 async function admins(){
-  const {data} = await sb.from("admins").select("*").order("role");
+  const {data}=await sb.from("admins").select("*").order("role");
   app.innerHTML=`
-    <div class="panel">
-      <div class="card">
-        <div class="back" onclick="menu()">← Назад</div>
-        <h3>👥 Админы</h3>
+  <div class="panel">
+    <div class="card">
+      <div class="back" onclick="menu()">← Назад</div>
+      <h3>👥 Админы</h3>
 
-        <input id="aid" placeholder="Telegram ID">
-        <button onclick="addAdmin()">➕ Добавить</button>
+      <input id="aid" class="admin-input" placeholder="Telegram ID">
+      <button onclick="addAdmin()">＋ Добавить</button>
 
-        ${data.map(a=>`
-          <div class="admin">
-            <div>ID ${a.id}<br><small>${a.role}</small></div>
-            ${a.id!==user.id?`<button class="danger" onclick="delAdmin(${a.id})">✖</button>`:""}
+      ${data.map(a=>`
+        <div class="admin">
+          <div class="admin-info">
+            <div class="admin-id">ID ${a.id}</div>
+            <div class="admin-role">${a.role}</div>
           </div>
-        `).join("")}
-      </div>
+          ${a.id!==user.id?`<div class="admin-del" onclick="delAdmin(${a.id})">✕</div>`:""}
+        </div>
+      `).join("")}
     </div>
-  `;
+  </div>`;
 }
 
 async function addAdmin(){
-  const id = Number(document.getElementById("aid").value);
+  const id=Number(document.getElementById("aid").value);
   if(!id) return;
   await sb.from("admins").insert({id,role:"ADMIN"});
   admins();
