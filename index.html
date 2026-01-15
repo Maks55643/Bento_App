@@ -96,7 +96,6 @@ body{
 }
 
 .big-btn.danger{background:#2a1d1d;color:var(--danger)}
-
 .back{color:var(--accent);cursor:pointer;margin-bottom:16px}
 
 /* ===== FACE ID ===== */
@@ -155,6 +154,12 @@ body{
 const tg = Telegram.WebApp;
 tg.expand();
 const user = tg.initDataUnsafe.user;
+
+/* 🔊 SOUND */
+const scanSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-scanning-sci-fi-alarm-905.mp3");
+const successSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-confirmation-tone-2867.mp3");
+scanSound.volume = 0.4;
+successSound.volume = 0.5;
 
 const sb = supabase.createClient(
   "https://mynsrqebdknpceyucayb.supabase.co",
@@ -216,6 +221,9 @@ function check(){
 
 /* FACE ID */
 function faceID(){
+  scanSound.currentTime = 0;
+  scanSound.play();
+
   app.innerHTML=`
   <div class="card">
     <h3>Face ID</h3>
@@ -233,7 +241,11 @@ function faceID(){
 
     <p style="color:var(--muted)">Сканирование…</p>
   </div>`;
-  setTimeout(menu,1800);
+
+  setTimeout(()=>{
+    successSound.play();
+    menu();
+  },1800);
 }
 
 /* MENU */
