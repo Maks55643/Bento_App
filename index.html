@@ -18,21 +18,14 @@
   --muted:#9aa0a6;
   --danger:#ff6b6b;
 }
+
 *{box-sizing:border-box;font-family:'Montserrat',sans-serif}
+
 body{
   margin:0;
   background:radial-gradient(circle at top,#1b1c29,#090a10);
   color:var(--text);
 }
-body.light{
-  background:radial-gradient(circle at top,#f5f6fb,#e6e7ef);
-  color:#000;
-}
-body.light .card{background:rgba(255,255,255,.85)}
-body.light .key{background:#e9eaf2;color:#000}
-body.light .dot{background:#cfd2e3}
-body.light .admin{background:#eceef7}
-body.light button.danger{background:#ffecec}
 
 #app{
   min-height:100vh;
@@ -41,6 +34,7 @@ body.light button.danger{background:#ffecec}
   align-items:center;
   padding:16px;
 }
+
 .card{
   background:var(--glass);
   backdrop-filter:blur(20px);
@@ -49,8 +43,8 @@ body.light button.danger{background:#ffecec}
   padding:24px;
   width:100%;
   max-width:360px;
-  text-align:center;
 }
+
 .avatar{
   width:90px;height:90px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
@@ -58,10 +52,12 @@ body.light button.danger{background:#ffecec}
   font-size:38px;font-weight:700;
   margin:0 auto 14px;
 }
+
 .dots{display:flex;justify-content:center;gap:14px;margin:26px 0}
 .dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
+
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .key{
   height:64px;border-radius:22px;
@@ -70,104 +66,62 @@ body.light button.danger{background:#ffecec}
   display:flex;align-items:center;justify-content:center;
 }
 .key.empty{background:none}
-button{
-  width:100%;padding:14px;border-radius:16px;
-  border:none;background:var(--accent);
-  color:white;font-size:16px;font-weight:600;margin-top:12px;
-}
-button.danger{background:#2a1d1d;color:var(--danger)}
-.back{color:var(--accent);cursor:pointer;text-align:left;margin-bottom:14px}
-.admin{display:flex;justify-content:space-between;align-items:center;
-  padding:14px;background:#1b1c28;border-radius:18px;margin-top:12px}
-.admin-del{color:var(--danger);cursor:pointer}
-input,select{
-  width:100%;padding:14px;border-radius:14px;
-  border:1px solid var(--stroke);
-  background:#1f2030;color:white;
-  margin-top:12px;
-}
-  /* === ADMIN PANEL PREMIUM UI === */
 
-.admin-section{
-  margin-top:20px;
-  padding-top:16px;
-  border-top:1px solid var(--stroke);
+.back{
+  color:var(--accent);
+  cursor:pointer;
+  margin-bottom:16px;
 }
 
-.admin-input,
-.admin-select{
+/* 🔥 ЕДИНЫЙ СТИЛЬ БОЛЬШИХ КНОПОК */
+.big-btn{
   width:100%;
-  padding:16px 18px;
+  height:56px;
   border-radius:18px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  font-size:15px;
-  margin-bottom:12px;
-  outline:none;
-}
-
-.admin-input::placeholder{
-  color:var(--muted);
-}
-
-.admin-btn{
-  width:100%;
-  padding:16px;
-  border-radius:20px;
   border:none;
-  background:linear-gradient(135deg,#7a7cff,#5f63ff);
+  background:var(--accent);
   color:white;
   font-size:16px;
   font-weight:600;
+  margin-top:14px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  box-shadow:0 12px 30px rgba(122,124,255,.35);
+  gap:10px;
 }
 
-.admin-list{
-  margin-top:20px;
+.big-btn.danger{
+  background:#2a1d1d;
+  color:var(--danger);
 }
 
+/* ADMINS */
 .admin{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:20px;
-  padding:16px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  margin-bottom:12px;
-}
-
-.admin-info{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.admin-id{
-  font-weight:600;
-  font-size:15px;
-}
-
-.admin-role{
-  font-size:13px;
-  color:var(--muted);
+  align-items:center;
+  padding:16px;
+  background:#1b1c28;
+  border-radius:18px;
+  margin-top:14px;
 }
 
 .admin-del{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,107,107,.12);
   color:var(--danger);
   font-size:18px;
+  cursor:pointer;
+}
+
+.input{
+  width:100%;
+  height:52px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  background:#1f2030;
+  color:white;
+  padding:0 16px;
+  font-size:15px;
+  margin-top:14px;
 }
 </style>
 </head>
@@ -188,15 +142,8 @@ const sb = supabase.createClient(
 let ROLE="", PIN="", input="", error=false;
 const app=document.getElementById("app");
 
-/* THEME */
-if(localStorage.getItem("theme")==="light"){
-  document.body.classList.add("light");
-}
-
 /* START */
 async function start(){
-  if(!user?.id) return app.innerHTML="⛔ Telegram error";
-
   const {data}=await sb.from("admins")
     .select("role,pin").eq("id",user.id).single();
 
@@ -204,9 +151,6 @@ async function start(){
 
   ROLE=data.role;
   PIN=String(data.pin).trim();
-
-  if(PIN.length!==4) return app.innerHTML="❌ PIN в базе неверный";
-
   drawPin();
 }
 
@@ -246,9 +190,9 @@ function menu(){
   <div class="card">
     <h2>👑 BENTO ADMIN</h2>
     <p>${user.first_name} • ${ROLE}</p>
-    <button onclick="settings()">⚙️ Настройки</button>
-    ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
-    <button class="danger" onclick="tg.close()">🚪 Выйти</button>
+    <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
+    ${ROLE==="OWNER"?`<button class="big-btn" onclick="admins()">👥 Админы</button>`:""}
+    <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
 
@@ -257,19 +201,12 @@ function settings(){
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
-    <button onclick="toggleTheme()">🌗 Сменить тему</button>
-    <button onclick="pinScreen()">🔐 Сменить PIN</button>
+    <button class="big-btn">🌗 Сменить тему</button>
+    <button class="big-btn" onclick="changePinScreen()">🔐 Сменить PIN</button>
   </div>`;
 }
 
-function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme",
-    document.body.classList.contains("light")?"light":"dark");
-}
-
-/* PIN CHANGE */
-function pinScreen(){
+function changePinScreen(){
   input="";
   app.innerHTML=`
   <div class="card">
@@ -279,17 +216,16 @@ function pinScreen(){
     <div class="keypad">
       ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?
         `<div class="key empty"></div>`:
-        `<div class="key" onclick="changePin('${k}')">${k}</div>`
+        `<div class="key" onclick="savePin('${k}')">${k}</div>`
       ).join("")}
     </div>
   </div>`;
 }
 
-async function changePin(k){
+async function savePin(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
-  document.querySelectorAll(".dot")
-    .forEach((d,i)=>d.classList.toggle("fill",input[i]));
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("fill",input[i]));
   if(input.length===4){
     await sb.from("admins").update({pin:input}).eq("id",user.id);
     PIN=input;
@@ -300,43 +236,32 @@ async function changePin(k){
 /* ADMINS */
 async function admins(){
   const {data}=await sb.from("admins").select("*");
-
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
 
-    <div class="admin-section">
-      <input id="newId" class="admin-input" placeholder="Telegram ID">
-      <select id="newRole" class="admin-input admin-select">
-        <option value="ADMIN">ADMIN</option>
-        <option value="OWNER">OWNER</option>
-      </select>
-      <button class="admin-btn" onclick="addAdmin()">
-        ➕ Добавить админа
-      </button>
-    </div>
+    <input class="input" id="aid" placeholder="Telegram ID">
+    <select class="input" id="arole">
+      <option>ADMIN</option>
+      <option>OWNER</option>
+    </select>
 
-    <div class="admin-list">
-      ${data.map(a=>`
-        <div class="admin">
-          <div class="admin-info">
-            <div class="admin-id">ID ${a.id}</div>
-            <div class="admin-role">${a.role}</div>
-          </div>
-          ${a.id!==user.id
-            ? `<div class="admin-del" onclick="del(${a.id})">✕</div>`
-            : ``}
-        </div>
-      `).join("")}
-    </div>
+    <button class="big-btn" onclick="addAdmin()">＋ Добавить админа</button>
+
+    ${data.map(a=>`
+      <div class="admin">
+        <div>ID ${a.id}<br><small>${a.role}</small></div>
+        ${a.id!==user.id?`<div class="admin-del" onclick="del(${a.id})">✕</div>`:""}
+      </div>
+    `).join("")}
   </div>`;
 }
 
 async function addAdmin(){
-  const id=document.getElementById("newId").value.trim();
-  const role=document.getElementById("newRole").value;
-  if(!id) return alert("Введите ID");
-  await sb.from("admins").insert({id:Number(id),role,pin:"0000"});
+  const id=Number(document.getElementById("aid").value);
+  const role=document.getElementById("arole").value;
+  if(!id) return;
+  await sb.from("admins").insert({id,role,pin:"0000"});
   admins();
 }
 
