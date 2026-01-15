@@ -194,9 +194,18 @@ function drawPin(){
   app.innerHTML=`
   <div class="card">
     <div class="avatar">${user.first_name[0]}</div>
-    <div class="dots">
-      ${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}
+
+    <div class="user-info">
+      <div class="user-name">${user.first_name}</div>
+      <div class="user-role">${ROLE}</div>
     </div>
+
+    <div class="dots">
+      ${[0,1,2,3].map(i=>`
+        <div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>
+      `).join("")}
+    </div>
+
     <div class="keypad">
       ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?
         `<div class="key empty"></div>`:
