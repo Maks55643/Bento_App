@@ -1,209 +1,179 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BENTO Admin Panel</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BENTO Admin Panel</title>
 
-  <!-- Telegram Mini App API -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <style>
-    :root {
-      --bg: #0e0e11;
-      --card: #1c1c22;
-      --accent: #8774e1;
-      --text: #ffffff;
-      --muted: #9aa0a6;
-      --danger: #ff6b6b;
-    }
+<style>
+:root {
+  --bg:#0e0e11;
+  --card:#1c1c22;
+  --accent:#8774e1;
+  --text:#fff;
+  --muted:#9aa0a6;
+  --danger:#ff6b6b;
+}
 
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont;
-    }
+* {
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont;
+}
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-    }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    #app {
-      padding: 16px;
-    }
+#app {
+  padding:16px;
+}
 
-    .header {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
+.header {
+  font-size:20px;
+  font-weight:600;
+  margin-bottom:16px;
+}
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
+.card {
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+}
 
-    .user {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+.user {
+  font-size:14px;
+  color:var(--muted);
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 10px;
-      border-radius: 14px;
-      border: none;
-      background: var(--accent);
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:14px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  font-size:16px;
+}
 
-    .menu button {
-      background: #2a2a33;
-      text-align: left;
-    }
+.menu button {
+  background:#2a2a33;
+  text-align:left;
+}
 
-    .menu button:hover {
-      background: #333344;
-    }
+.exit {
+  background:#2a1d1d;
+  color:var(--danger);
+}
 
-    .exit {
-      background: #2a1d1d !important;
-      color: var(--danger);
-    }
+.back {
+  color:var(--accent);
+  margin-bottom:10px;
+  cursor:pointer;
+}
 
-    .back {
-      color: var(--accent);
-      font-size: 15px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    input {
-      width: 100%;
-      padding: 16px;
-      font-size: 20px;
-      border-radius: 14px;
-      border: none;
-      background: #2a2a33;
-      color: white;
-      text-align: center;
-      letter-spacing: 6px;
-    }
-  </style>
+input {
+  width:100%;
+  padding:16px;
+  font-size:20px;
+  border-radius:14px;
+  border:none;
+  background:#2a2a33;
+  color:white;
+  text-align:center;
+  letter-spacing:6px;
+}
+</style>
 </head>
 
 <body>
-  <div id="app">Загрузка…</div>
+<div id="app">Загрузка…</div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+<script>
+const tg = Telegram.WebApp;
+tg.expand();
 
-    /* ================= НАСТРОЙКИ ================= */
+/* ===== НАСТРОЙКИ ===== */
+const OWNER_IDS = [8354848795]; // ← ВСТАВЬ РЕАЛЬНЫЙ TG ID
+const PIN_CODE = "2580";
+/* ===================== */
 
-    const OWNER_IDS = [8354848795]; // ← ВСТАВЬ СВОЙ TG ID (БЕЗ КАВЫЧЕК)
-    const PIN_CODE = "2580";       // ← ТВОЙ PIN
+const app = document.getElementById("app");
+const user = tg.initDataUnsafe?.user;
 
-    /* ============================================= */
+/* ===== ПРОВЕРКА TELEGRAM ===== */
+if (!user) {
+  app.innerHTML = `
+    <div class="header">❌ Ошибка</div>
+    <div class="card">Открой панель через кнопку в боте</div>
+  `;
+} else if (!OWNER_IDS.includes(Number(user.id))) {
+  app.innerHTML = `
+    <div class="header">⛔ Доступ запрещён</div>
+    <div class="card">
+      <div>ID: ${user.id}</div>
+      <div>Нет прав Owner</div>
+    </div>
+  `;
+} else {
+  showPin();
+}
 
-    const app = document.getElementById("app");
-    const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+/* ===== PIN ===== */
+function showPin() {
+  app.innerHTML = `
+    <div class="header">🔐 Введите PIN</div>
+    <div class="card">
+      <input id="pin" type="password" inputmode="numeric" maxlength="6" />
+      <button onclick="checkPin()">Войти</button>
+      <div id="error" style="color:#ff6b6b;margin-top:8px"></div>
+    </div>
+  `;
+}
 
-    /* ====== ПРОВЕРКА TELEGRAM ====== */
+function checkPin() {
+  const value = document.getElementById("pin").value;
+  if (value === PIN_CODE) {
+    renderMain();
+  } else {
+    document.getElementById("error").innerText = "Неверный PIN";
+  }
+}
 
-    if (!user) {
-      app.innerHTML = `
-        <div class="header">❌ Нет данных Telegram</div>
-        <div class="card">
-          <p>Открой админ-панель <b>ТОЛЬКО</b> через кнопку в боте.</p>
-        </div>
-      `;
-      throw new Error("No Telegram user");
-    }
+/* ===== ГЛАВНОЕ МЕНЮ ===== */
+function renderMain() {
+  app.innerHTML = `
+    <div class="header">👑 BENTO ADMIN</div>
 
-    console.log("Telegram ID:", user.id);
+    <div class="card">
+      <b>${user.first_name}</b>
+      <div class="user">ID: ${user.id}</div>
+    </div>
 
-    if (!OWNER_IDS.includes(Number(user.id))) {
-      app.innerHTML = `
-        <div class="header">⛔ Доступ запрещён</div>
-        <div class="card">
-          <p><b>Твой ID:</b> ${user.id}</p>
-          <p>Нет прав администратора</p>
-        </div>
-      `;
-      throw new Error("Access denied");
-    }
+    <div class="card menu">
+      <button onclick="openSection('Заявки')">📨 Заявки</button>
+      <button onclick="openSection('Админы')">👥 Админы</button>
+      <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
+      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
+      <button class="exit" onclick="tg.close()">🚪 Выйти</button>
+    </div>
+  `;
+}
 
-    /* ====== PIN ====== */
-
-    showPin();
-
-    function showPin() {
-      app.innerHTML = `
-        <div class="header">🔐 Введите PIN</div>
-        <div class="card">
-          <input
-            id="pin"
-            type="password"
-            inputmode="numeric"
-            maxlength="6"
-            placeholder="••••"
-          />
-          <button onclick="checkPin()">Войти</button>
-        </div>
-      `;
-    }
-
-    function checkPin() {
-      const value = document.getElementById("pin").value;
-      if (value === PIN_CODE) {
-        renderMain();
-      } else {
-        app.innerHTML = `
-          <div class="header">❌ Неверный PIN</div>
-          <div class="card">Попробуй снова</div>
-        `;
-      }
-    }
-
-    /* ====== ГЛАВНОЕ МЕНЮ ====== */
-
-    function renderMain() {
-      app.innerHTML = `
-        <div class="header">👑 BENTO ADMIN</div>
-
-        <div class="card">
-          <div><b>${user.first_name}</b></div>
-          <div class="user">ID: ${user.id}</div>
-        </div>
-
-        <div class="card menu">
-          <button onclick="openSection('applications')">📨 Заявки</button>
-          <button onclick="openSection('admins')">👥 Админы</button>
-          <button onclick="openSection('blacklist')">⛔ Блэклист</button>
-          <button onclick="openSection('settings')">⚙️ Настройки</button>
-          <button class="exit" onclick="tg.close()">🚪 Выйти</button>
-        </div>
-      `;
-    }
-
-    /* ====== РАЗДЕЛЫ ====== */
-
-    window.openSection = function(section) {
-      app.innerHTML = `
-        <div class="back" onclick="renderMain()">← Назад</div>
-        <div class="card">
-          <b>Раздел:</b> ${section}
-        </div>
-      `;
-    };
-  </script>
+window.openSection = function(name) {
+  app.innerHTML = `
+    <div class="back" onclick="renderMain()">← Назад</div>
+    <div class="card">
+      <b>${name}</b><br>
+      Раздел в разработке
+    </div>
+  `;
+};
+</script>
 </body>
 </html>
