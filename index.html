@@ -88,6 +88,17 @@ input {
   text-align:center;
   letter-spacing:6px;
 }
+
+/* 👁️ WATERMARK */
+#watermark {
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  opacity:0.15;
+  font-size:12px;
+  pointer-events:none;
+  z-index:9999;
+}
 </style>
 </head>
 
@@ -95,44 +106,77 @@ input {
 <div id="app">Загрузка…</div>
 
 <script>
+/* ================= 🔒 УРОВЕНЬ 1 — ТОЛЬКО TELEGRAM ================= */
+if (!window.Telegram || !Telegram.WebApp) {
+  document.body.innerHTML = `
+    <h2 style="color:red;text-align:center;margin-top:40px">
+      ❌ Доступ запрещён
+    </h2>
+    <p style="text-align:center">
+      Открой панель только через Telegram
+    </p>
+  `;
+  throw new Error("Not Telegram");
+}
+
+/* ================= 🕵️‍♂️ УРОВЕНЬ 2 — АНТИ-ОТЛАДКА ================= */
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey) ||
+    (e.ctrlKey && e.key === "u")
+  ) {
+    e.preventDefault();
+  }
+});
+
 const tg = Telegram.WebApp;
 tg.expand();
 
-/* ========= НАСТРОЙКИ ========= */
+/* ================= НАСТРОЙКИ ================= */
 
 // OWNER — ТОЛЬКО ТЫ
 const OWNER_IDS = [8354848795];
 
-// АДМИНЫ (добавляешь сюда)
+// АДМИНЫ (добавляй сюда)
 const ADMIN_IDS = [
   1111111111,
   2222222222
 ];
 
-// PIN (общий)
 const PIN_CODE = "2580";
 
-/* ============================= */
+/* ============================================= */
 
 const app = document.getElementById("app");
 const user = tg.initDataUnsafe?.user;
 
-/* ========= РОЛЬ ========= */
+/* ================= ⏱️ УРОВЕНЬ 4 — АВТОВЫХОД ================= */
+let idleTimer;
+function resetTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => tg.close(), 3 * 60 * 1000);
+}
+["click","touchstart","keydown"].forEach(e =>
+  document.addEventListener(e, resetTimer)
+);
+resetTimer();
+
+/* ================= РОЛЬ ================= */
 let ROLE = null;
 
 if (user) {
-  if (OWNER_IDS.includes(Number(user.id))) {
-    ROLE = "OWNER";
-  } else if (ADMIN_IDS.includes(Number(user.id))) {
-    ROLE = "ADMIN";
-  }
+  if (OWNER_IDS.includes(Number(user.id))) ROLE = "OWNER";
+  else if (ADMIN_IDS.includes(Number(user.id))) ROLE = "ADMIN";
 }
 
-/* ========= ПРОВЕРКА ========= */
+/* ================= ПРОВЕРКА ДОСТУПА ================= */
 if (!user) {
   app.innerHTML = `
     <div class="header">❌ Ошибка</div>
-    <div class="card">Открой админ-панель через кнопку в Telegram</div>
+    <div class="card">Открой панель через кнопку в боте</div>
   `;
   tg.close();
 
@@ -150,7 +194,7 @@ if (!user) {
   showPin();
 }
 
-/* ========= PIN ========= */
+/* ================= PIN ================= */
 function showPin() {
   app.innerHTML = `
     <div class="header">🔐 Введите PIN</div>
@@ -166,18 +210,25 @@ function checkPin() {
   const value = document.getElementById("pin").value;
   if (value === PIN_CODE) {
     renderMain();
+    addWatermark();
   } else {
     document.getElementById("error").innerText = "Неверный PIN";
   }
 }
 
-/* ========= ГЛАВНОЕ МЕНЮ ========= */
-function renderMain() {
-  let adminBlock = "";
+/* ================= 👁️ WATERMARK ================= */
+function addWatermark() {
+  const wm = document.createElement("div");
+  wm.id = "watermark";
+  wm.innerText = `BENTO • ${ROLE} • ID ${user.id}`;
+  document.body.appendChild(wm);
+}
 
-  if (ROLE === "OWNER") {
-    adminBlock = `<button onclick="openSection('Админы')">👥 Админы</button>`;
-  }
+/* ================= ГЛАВНОЕ МЕНЮ ================= */
+function renderMain() {
+  const adminButton = ROLE === "OWNER"
+    ? `<button onclick="openSection('Админы')">👥 Админы</button>`
+    : ``;
 
   app.innerHTML = `
     <div class="header">👑 BENTO ADMIN</div>
@@ -190,7 +241,7 @@ function renderMain() {
 
     <div class="card menu">
       <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${adminBlock}
+      ${adminButton}
       <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
       <button onclick="openSection('Настройки')">⚙️ Настройки</button>
       <button class="exit" onclick="tg.close()">🚪 Выйти</button>
@@ -198,13 +249,13 @@ function renderMain() {
   `;
 }
 
-/* ========= РАЗДЕЛЫ ========= */
+/* ================= РАЗДЕЛЫ ================= */
 window.openSection = function(name) {
 
   if (name === "Админы" && ROLE !== "OWNER") {
     app.innerHTML = `
       <div class="header">⛔ Доступ запрещён</div>
-      <div class="card">Раздел доступен только Owner</div>
+      <div class="card">Только для Owner</div>
     `;
     return;
   }
