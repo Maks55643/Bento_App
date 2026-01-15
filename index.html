@@ -193,7 +193,12 @@ function press(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
   error=false;
-  if(input.length===4) check();
+
+  if(input.length===4){
+    check();
+    return; // ⬅️ ВАЖНО
+  }
+
   drawPin();
 }
 
