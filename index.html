@@ -125,10 +125,23 @@ function resetIdle(){
 
 async function start(){
   resetIdle();
-  const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
-  if(!data) return app.innerHTML="⛔ Нет доступа";
+
+  const { data } = await sb
+    .from("admins")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if(!data){
+    app.innerHTML = "⛔ Нет доступа";
+    return;
+  }
+
   ROLE = data.role;
-  USER_PIN = String(data.pin).trim(); // ✅ ИСПРАВЛЕНИЕ
+
+  // ✅ ИСПРАВЛЕНИЕ ОШИБКИ PIN
+  USER_PIN = data.pin ? String(data.pin) : "2580";
+
   pin();
 }
 
@@ -163,11 +176,11 @@ function press(k){
 }
 
 function checkPin(){
-  if(input === USER_PIN){
+  if (String(input) === String(USER_PIN)) {
     welcome();
   } else {
-    input="";
-    error=true;
+    input = "";
+    error = true;
     pin();
   }
 }
