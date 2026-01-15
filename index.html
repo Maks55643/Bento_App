@@ -5,12 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BENTO Admin</title>
 
+<!-- Telegram -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Montserrat -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
+  --bg:#0e0f13;
   --glass:rgba(28,28,36,.75);
   --stroke:rgba(255,255,255,.06);
   --accent:#7a7cff;
@@ -19,7 +25,11 @@
   --danger:#ff6b6b;
 }
 
-*{box-sizing:border-box;font-family:'Montserrat',sans-serif}
+/* ===== GLOBAL ===== */
+*{
+  box-sizing:border-box;
+  font-family:'Montserrat',sans-serif;
+}
 
 body{
   margin:0;
@@ -35,7 +45,7 @@ body{
   padding:16px;
 }
 
-/* ===== GLASS CARD ===== */
+/* ===== GLASS ===== */
 .card{
   background:var(--glass);
   backdrop-filter:blur(20px);
@@ -49,87 +59,136 @@ body{
 
 /* ===== USER ===== */
 .avatar{
-  width:90px;height:90px;border-radius:50%;
+  width:90px;
+  height:90px;
+  border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
-  display:flex;align-items:center;justify-content:center;
-  font-size:38px;font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:38px;
+  font-weight:700;
   margin:0 auto 14px;
 }
 
 .name{font-size:22px;font-weight:600}
 .role{color:var(--muted);margin-bottom:22px}
 
-/* ===== PIN ===== */
-.dots{display:flex;justify-content:center;gap:14px;margin:26px 0}
-.dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
+/* ===== PIN DOTS ===== */
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin:26px 0;
+}
+
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#2b2c3a;
+}
+
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
 
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* ===== KEYPAD ===== */
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
 .key{
-  height:64px;border-radius:22px;
+  height:64px;
+  border-radius:22px;
   background:#1f2030;
-  font-size:22px;font-weight:600;
-  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
 }
-.key.empty{background:none;pointer-events:none}
 
-/* ===== BUTTONS ===== */
+.key:active{
+  transform:scale(.96);
+}
+
+.key.empty{
+  background:none;
+  pointer-events:none;
+}
+
+/* ===== PANEL ===== */
+.panel{width:100%;max-width:380px}
+
 button{
-  width:100%;padding:14px;
-  border-radius:16px;border:none;
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:none;
   background:var(--accent);
-  color:white;font-size:16px;font-weight:600;
+  color:white;
+  font-size:16px;
+  font-weight:600;
   margin-top:12px;
 }
-button.danger{background:#2a1d1d;color:var(--danger)}
 
-.back{color:var(--accent);cursor:pointer;margin-bottom:12px;text-align:left}
-
-/* ===== ADMINS UI ===== */
-.input{
-  width:100%;
-  padding:14px 16px;
-  border-radius:16px;
-  background:#1f2030;
-  border:1px solid var(--stroke);
-  color:white;
-  font-size:15px;
-  margin-bottom:14px;
+button.danger{
+  background:#2a1d1d;
+  color:var(--danger);
 }
-.input::placeholder{color:var(--muted)}
 
+.back{
+  color:var(--accent);
+  cursor:pointer;
+  text-align:left;
+  margin-bottom:12px;
+}
+
+/* ===== ADMINS ===== */
 .admin{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  padding:14px 16px;
-  background:linear-gradient(180deg,#1c1d2b,#171827);
-  border-radius:18px;
-  margin-top:12px;
-}
-
-.admin-left{
-  display:flex;
-  gap:12px;
   align-items:center;
+  padding:12px;
+  background:#1f2030;
+  border-radius:14px;
+  margin-top:10px;
+  font-size:14px;
 }
 
-.admin-avatar{
-  width:42px;height:42px;border-radius:50%;
+/* ===== WELCOME ===== */
+.welcome{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  animation:fade .6s ease;
+}
+
+.welcome-avatar{
+  width:110px;
+  height:110px;
+  border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:44px;
   font-weight:700;
+  margin-bottom:18px;
+  animation:pop .6s ease;
 }
 
-.admin-role{font-size:12px;color:var(--muted)}
+@keyframes fade{
+  from{opacity:0}
+  to{opacity:1}
+}
 
-.admin button{
-  background:none;
-  border:none;
-  color:var(--danger);
-  font-size:18px;
+@keyframes pop{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
 }
 </style>
 </head>
@@ -138,46 +197,64 @@ button.danger{background:#2a1d1d;color:var(--danger)}
 <div id="app">⏳</div>
 
 <script>
+/* ===== TELEGRAM ===== */
 const tg = Telegram.WebApp;
 tg.expand();
 const user = tg.initDataUnsafe.user;
 
+/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
   "https://duqqpuitipndkghpqupb.supabase.co",
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
 
-const PIN="2580";
-let ROLE=null,input="",error=false;
-const app=document.getElementById("app");
+/* ===== CONFIG ===== */
+const PIN = "2580";
+let ROLE = null;
+let input = "";
+let error = false;
+const app = document.getElementById("app");
 
 /* ===== AUTO EXIT ===== */
 let idle;
 function resetIdle(){
   clearTimeout(idle);
-  idle=setTimeout(()=>tg.close(),180000);
+  idle = setTimeout(()=>tg.close(),180000);
 }
-["click","keydown","touchstart"].forEach(e=>document.addEventListener(e,resetIdle));
+["click","touchstart","keydown"].forEach(e=>document.addEventListener(e,resetIdle));
 
 /* ===== START ===== */
 async function start(){
   resetIdle();
-  const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
+  const {data} = await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE=data.role;
+  ROLE = data.role;
   pin();
 }
 
 /* ===== PIN ===== */
 function pin(){
   app.innerHTML=`
-  <div class="card">
-    <div class="avatar">${user.first_name[0]}</div>
-    <div class="name">${user.first_name}</div>
-    <div class="role">${ROLE}</div>
-    <div class="dots">${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}</div>
-    <div class="keypad">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?`<div class="key empty"></div>`:`<div class="key" onclick="press('${k}')">${k}</div>`).join("")}</div>
-  </div>`;
+    <div class="card">
+      <div class="avatar">${user.first_name[0]}</div>
+      <div class="name">${user.first_name}</div>
+      <div class="role">${ROLE}</div>
+
+      <div class="dots">
+        ${[0,1,2,3].map(i=>`
+          <div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>
+        `).join("")}
+      </div>
+
+      <div class="keypad">
+        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
+          k==="" 
+          ? `<div class="key empty"></div>`
+          : `<div class="key" onclick="press('${k}')">${k}</div>`
+        ).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function press(k){
@@ -185,59 +262,77 @@ function press(k){
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
   error=false;
-  if(input.length===4) return setTimeout(checkPin,180);
+  if(input.length===4) return setTimeout(checkPin,200);
   pin();
 }
 
 function checkPin(){
-  if(input===PIN) menu();
-  else{input="";error=true;pin();}
+  if(input===PIN) welcome();
+  else{
+    input="";
+    error=true;
+    pin();
+  }
+}
+
+/* ===== WELCOME ===== */
+function welcome(){
+  app.innerHTML=`
+    <div class="panel">
+      <div class="card welcome">
+        <div class="welcome-avatar">${user.first_name[0]}</div>
+        <h2>Добро пожаловать</h2>
+        <p style="color:var(--muted)">BENTO ADMIN PANEL</p>
+      </div>
+    </div>
+  `;
+  setTimeout(menu,1800);
 }
 
 /* ===== MENU ===== */
 function menu(){
   resetIdle();
   app.innerHTML=`
-  <div class="card">
-    <h2>👑 BENTO ADMIN</h2>
-    <p>${user.first_name} • ${ROLE}</p>
-    <button onclick="openSection('Заявки')">📨 Заявки</button>
-    ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
-    <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
-    <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-    <button class="danger" onclick="tg.close()">🚪 Выйти</button>
-  </div>`;
+    <div class="panel">
+      <div class="card">
+        <h2>👑 BENTO ADMIN</h2>
+        <p>${user.first_name} • ${ROLE}</p>
+
+        <button>📨 Заявки</button>
+        ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
+        <button>⛔ Блэклист</button>
+        <button>⚙️ Настройки</button>
+        <button class="danger" onclick="tg.close()">🚪 Выйти</button>
+      </div>
+    </div>
+  `;
 }
 
 /* ===== ADMINS ===== */
 async function admins(){
-  resetIdle();
-  const {data}=await sb.from("admins").select("*").order("role");
+  const {data} = await sb.from("admins").select("*").order("role");
   app.innerHTML=`
-  <div class="card">
-    <div class="back" onclick="menu()">← Назад</div>
-    <h3>👥 Админы</h3>
+    <div class="panel">
+      <div class="card">
+        <div class="back" onclick="menu()">← Назад</div>
+        <h3>👥 Админы</h3>
 
-    <input id="aid" class="input" placeholder="Telegram ID">
-    <button onclick="addAdmin()">＋ Добавить админа</button>
+        <input id="aid" placeholder="Telegram ID">
+        <button onclick="addAdmin()">➕ Добавить</button>
 
-    ${data.map(a=>`
-      <div class="admin">
-        <div class="admin-left">
-          <div class="admin-avatar">${a.role[0]}</div>
-          <div>
-            <div>ID ${a.id}</div>
-            <div class="admin-role">${a.role}</div>
+        ${data.map(a=>`
+          <div class="admin">
+            <div>ID ${a.id}<br><small>${a.role}</small></div>
+            ${a.id!==user.id?`<button class="danger" onclick="delAdmin(${a.id})">✖</button>`:""}
           </div>
-        </div>
-        ${a.id!==user.id?`<button onclick="delAdmin(${a.id})">✕</button>`:""}
+        `).join("")}
       </div>
-    `).join("")}
-  </div>`;
+    </div>
+  `;
 }
 
 async function addAdmin(){
-  const id=Number(document.getElementById("aid").value);
+  const id = Number(document.getElementById("aid").value);
   if(!id) return;
   await sb.from("admins").insert({id,role:"ADMIN"});
   admins();
@@ -248,16 +343,6 @@ async function delAdmin(id){
     await sb.from("admins").delete().eq("id",id);
     admins();
   }
-}
-
-function openSection(name){
-  resetIdle();
-  app.innerHTML=`
-  <div class="card">
-    <div class="back" onclick="menu()">← Назад</div>
-    <h2>${name}</h2>
-    <p style="color:var(--muted)">Раздел в разработке</p>
-  </div>`;
 }
 
 start();
