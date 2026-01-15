@@ -32,13 +32,13 @@ body.light{
 *{
   box-sizing:border-box;
   font-family:'Montserrat',sans-serif;
+  transition:background .35s ease,color .35s ease,border-color .35s ease;
 }
 
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  transition:background .35s ease,color .35s ease;
 }
 
 #app{
@@ -57,7 +57,6 @@ body{
   padding:24px;
   width:100%;
   max-width:360px;
-  transition:background .35s ease;
 }
 
 .avatar{
@@ -79,7 +78,6 @@ body{
   background:#1f2030;
   font-size:22px;font-weight:600;
   display:flex;align-items:center;justify-content:center;
-  transition:background .3s ease;
 }
 .key.empty{background:none}
 
@@ -211,8 +209,8 @@ function menu(){
   <div class="card">
     <h2>👑 BENTO ADMIN</h2>
     <p>${user.first_name} • ${ROLE}</p>
-    <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
-    ${ROLE==="OWNER"?`<button class="big-btn" onclick="admins()">👥 Админы</button>`:""}
+    <button class="big-btn" data-action="settings">⚙️ Настройки</button>
+    ${ROLE==="OWNER"?`<button class="big-btn" data-action="admins">👥 Админы</button>`:""}
     <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
@@ -221,13 +219,66 @@ function menu(){
 function settings(){
   app.innerHTML=`
   <div class="card">
-    <div class="back" onclick="menu()">← Назад</div>
-    <button class="big-btn" onclick="toggleTheme()">🌗 Сменить тему</button>
-    <button class="big-btn" onclick="changePinScreen()">🔐 Сменить PIN</button>
+    <div class="back" data-action="menu">← Назад</div>
+    <button class="big-btn" data-action="theme">🌗 Сменить тему</button>
+    <button class="big-btn" data-action="changePin">🔐 Сменить PIN</button>
   </div>`;
 }
 
-/* остальной код без изменений */
+/* CHANGE PIN */
+function changePinScreen(){
+  input="";
+  app.innerHTML=`
+  <div class="card">
+    <div class="back" data-action="settings">← Назад</div>
+    <h3>Новый PIN</h3>
+    <div class="dots">${[0,1,2,3].map(()=>`<div class="dot"></div>`).join("")}</div>
+    <div class="keypad">
+      ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?
+        `<div class="key empty"></div>`:
+        `<div class="key" onclick="savePin('${k}')">${k}</div>`
+      ).join("")}
+    </div>
+  </div>`;
+}
+
+async function savePin(k){
+  if(k==="⌫") input=input.slice(0,-1);
+  else if(input.length<4) input+=k;
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("fill",input[i]));
+  if(input.length===4){
+    await sb.from("admins").update({pin:input}).eq("id",user.id);
+    PIN=input;
+    menu();
+  }
+}
+
+/* ADMINS */
+async function admins(){
+  const {data}=await sb.from("admins").select("*");
+  app.innerHTML=`
+  <div class="card">
+    <div class="back" data-action="menu">← Назад</div>
+    ${data.map(a=>`
+      <div class="admin">
+        <div>ID ${a.id}<br><small>${a.role}</small></div>
+      </div>
+    `).join("")}
+  </div>`;
+}
+
+/* GLOBAL BUTTON HANDLER (КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ) */
+document.addEventListener("click",(e)=>{
+  const el=e.target.closest("[data-action]");
+  if(!el) return;
+  const a=el.dataset.action;
+  if(a==="menu") menu();
+  if(a==="settings") settings();
+  if(a==="admins") admins();
+  if(a==="changePin") changePinScreen();
+  if(a==="theme") toggleTheme();
+});
+
 start();
 </script>
 </body>
