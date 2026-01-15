@@ -9,170 +9,105 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root {
-  --bg:#0e0e11;
-  --card:#1c1c22;
-  --accent:#8774e1;
-  --text:#fff;
-  --muted:#9aa0a6;
-  --danger:#ff6b6b;
-  --success:#4cd964;
+body {
+  margin:0;
+  background:#0e0e11;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont;
 }
-* { box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont; }
-body { margin:0; background:var(--bg); color:var(--text); }
-#app { padding:16px; }
-.card { background:var(--card); border-radius:16px; padding:16px; margin-bottom:14px; }
-.header { font-size:20px; font-weight:600; margin-bottom:16px; }
-.user { color:var(--muted); font-size:14px; }
-button { width:100%; padding:14px; border-radius:14px; border:none; background:var(--accent); color:white; font-size:16px; margin-top:10px; }
-.exit { background:#2a1d1d; color:var(--danger); }
-input { width:100%; padding:14px; border-radius:14px; border:none; background:#2a2a33; color:white; margin-top:10px; }
-.back { color:var(--accent); margin-bottom:10px; cursor:pointer; }
-.log { padding:10px; border-radius:10px; margin-bottom:8px; font-size:14px; }
-.log.success { background:#1f2d24; color:var(--success); }
-.log.danger { background:#2a1d1d; color:var(--danger); }
-#watermark { position:fixed; bottom:10px; right:10px; opacity:.15; font-size:12px; }
+#app { padding:20px; }
+.card {
+  background:#1c1c22;
+  border-radius:16px;
+  padding:16px;
+}
+button {
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:#8774e1;
+  color:white;
+  font-size:16px;
+}
+.error { color:#ff6b6b; }
 </style>
 </head>
 
 <body>
-<div id="app">Загрузка…</div>
+<div id="app">⏳ Загрузка…</div>
 
 <script>
-/* ===== CONFIG ===== */
-const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";
-const OWNER_IDS = [8354848795];
-const PIN_CODE = "2580";
-
-/* ===== INIT ===== */
+/* TELEGRAM */
 if (!window.Telegram?.WebApp) {
-  document.body.innerHTML = "<h2 style='color:red;text-align:center'>❌ Только через Telegram</h2>";
-  throw "";
+  document.body.innerHTML = "❌ Только через Telegram";
+  throw new Error("No Telegram");
 }
 const tg = Telegram.WebApp;
 tg.expand();
 
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = document.getElementById("app");
-const user = tg.initDataUnsafe.user;
+const user = tg.initDataUnsafe?.user;
 
-let ROLE = null;
+/* SUPABASE */
+const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co"; // ← ОБЯЗАТЕЛЬНО
+const SUPABASE_ANON_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";   // ← ОБЯЗАТЕЛЬНО
 
-/* ===== LOGS ===== */
-function log(type,text){
-  console.log(`[${type}]`,text);
+const supabase = supabaseJs.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* START */
+if (!user) {
+  app.innerHTML = "<div class='card error'>❌ Нет данных Telegram</div>";
+  throw new Error("No user");
 }
 
-/* ===== CHECK ROLE ===== */
-async function checkAccess() {
-  if (OWNER_IDS.includes(user.id)) {
-    ROLE = "OWNER";
-    return true;
+checkAdmin();
+
+/* CHECK ADMIN */
+async function checkAdmin() {
+  try {
+    const { data, error } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !data) {
+      app.innerHTML = `
+        <div class="card error">
+          ⛔ У тебя нет доступа<br><br>
+          ID: ${user.id}
+        </div>
+      `;
+      return;
+    }
+
+    renderAdmin();
+
+  } catch (e) {
+    app.innerHTML = `
+      <div class="card error">
+        ❌ Ошибка Supabase<br>
+        ${e.message}
+      </div>
+    `;
   }
-
-  const { data } = await supabase
-    .from("admins")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (data) {
-    ROLE = "ADMIN";
-    return true;
-  }
-
-  return false;
 }
 
-/* ===== PIN ===== */
-function showPin(){
+/* ADMIN UI */
+function renderAdmin() {
   app.innerHTML = `
-    <div class="header">🔐 PIN</div>
     <div class="card">
-      <input id="pin" type="password" placeholder="Введите PIN">
-      <button onclick="checkPin()">Войти</button>
-    </div>`;
+      <b>👑 BENTO ADMIN</b><br><br>
+      ${user.first_name}<br>
+      ID: ${user.id}<br><br>
+      <button onclick="tg.close()">🚪 Выйти</button>
+    </div>
+  `;
 }
-
-function checkPin(){
-  if (document.getElementById("pin").value === PIN_CODE){
-    renderMain();
-    watermark();
-  } else alert("Неверный PIN");
-}
-
-/* ===== WATERMARK ===== */
-function watermark(){
-  const w=document.createElement("div");
-  w.id="watermark";
-  w.innerText=`BENTO • ${ROLE} • ${user.id}`;
-  document.body.appendChild(w);
-}
-
-/* ===== MAIN ===== */
-function renderMain(){
-  app.innerHTML=`
-  <div class="header">👑 BENTO ADMIN</div>
-
-  <div class="card">
-    <b>${user.first_name}</b>
-    <div class="user">ID: ${user.id}</div>
-    <div class="user">Роль: ${ROLE}</div>
-  </div>
-
-  <div class="card">
-    ${ROLE==="OWNER" ? `<button onclick="admins()">👥 Управление админами</button>` : ""}
-    <button class="exit" onclick="tg.close()">🚪 Выйти</button>
-  </div>`;
-}
-
-/* ===== ADMINS ===== */
-async function admins(){
-  const { data } = await supabase.from("admins").select("*").order("added_at",{ascending:false});
-
-  app.innerHTML=`
-  <div class="back" onclick="renderMain()">← Назад</div>
-  <div class="header">👥 Админы</div>
-
-  <div class="card">
-    <input id="newAdmin" placeholder="Telegram ID">
-    <button onclick="addAdmin()">➕ Добавить</button>
-  </div>
-
-  ${data.map(a=>`
-    <div class="card">
-      ID: ${a.id}
-      <button class="exit" onclick="delAdmin(${a.id})">Удалить</button>
-    </div>`).join("")}`;
-}
-
-async function addAdmin(){
-  const id=Number(document.getElementById("newAdmin").value);
-  if(!id) return alert("ID?");
-  await supabase.from("admins").insert({id});
-  admins();
-}
-
-async function delAdmin(id){
-  await supabase.from("admins").delete().eq("id",id);
-  admins();
-}
-
-/* ===== START ===== */
-(async ()=>{
-  const ok = await checkAccess();
-  if (!ok){
-    app.innerHTML=`
-      <div class="header">⛔ Нет доступа</div>
-      <div class="card">
-        ID ${user.id}<br><br>
-        Доступ не выдан
-      </div>`;
-    return;
-  }
-  showPin();
-})();
 </script>
 </body>
 </html>
