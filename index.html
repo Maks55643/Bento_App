@@ -18,7 +18,10 @@
   --danger:#ff6b6b;
 }
 
-* { box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont; }
+* {
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont;
+}
 
 body {
   margin:0;
@@ -40,19 +43,46 @@ body {
 }
 
 .avatar {
-  width:88px;height:88px;border-radius:50%;
+  width:88px;
+  height:88px;
+  border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#6f6cff);
-  display:flex;align-items:center;justify-content:center;
-  font-size:38px;font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:38px;
+  font-weight:700;
   margin:0 auto 14px;
 }
 
-.name { font-size:20px;font-weight:600; }
-.role { color:var(--muted);font-size:14px;margin-bottom:20px; }
+.name {
+  font-size:20px;
+  font-weight:600;
+}
 
-.pin { display:flex;justify-content:center;gap:10px;margin-bottom:14px; }
-.dot { width:14px;height:14px;border-radius:50%;background:#2a2a33; }
-.dot.fill { background:var(--accent); }
+.role {
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.pin {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.dot {
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#2a2a33;
+}
+
+.dot.fill {
+  background:var(--accent);
+}
 
 .keyboard {
   display:grid;
@@ -69,35 +99,14 @@ body {
   cursor:pointer;
 }
 
-.key:active { transform:scale(.95); }
-
-.error { color:var(--danger);font-size:14px;margin-top:10px; }
-
-.card {
-  background:var(--card);
-  padding:16px;
-  border-radius:16px;
-  max-width:360px;
+.key:active {
+  transform:scale(.95);
 }
 
-button {
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  background:var(--accent);
-  color:white;
-  font-size:15px;
+.error {
+  color:var(--danger);
+  font-size:14px;
   margin-top:10px;
-}
-button.danger { background:#2a1d1d;color:#ff6b6b; }
-input {
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  background:#2a2a33;
-  color:white;
 }
 </style>
 </head>
@@ -126,16 +135,35 @@ let input = "";
 let ROLE = null;
 const app = document.getElementById("app");
 
+/* ===== AUTO EXIT ===== */
+const IDLE_TIME = 3 * 60 * 1000; // 3 минуты
+let idleTimer;
+
+function startIdleTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    input = "";
+    alert("⏱ Сессия завершена по бездействию");
+    tg.close();
+  }, IDLE_TIME);
+}
+
+["click","touchstart","keydown"].forEach(e => {
+  document.addEventListener(e, startIdleTimer);
+});
+
 /* ===== ACCESS ===== */
 async function checkAccess() {
-  const { data, error } = await sb
+  startIdleTimer();
+
+  const { data } = await sb
     .from("admins")
     .select("role")
     .eq("id", user.id)
-    .maybeSingle();
+    .single();
 
   if (!data) {
-    app.innerHTML = "<div class='card'>⛔ Нет доступа</div>";
+    app.innerHTML = "⛔ Нет доступа";
     return;
   }
 
@@ -145,6 +173,8 @@ async function checkAccess() {
 
 /* ===== LOCK ===== */
 function renderLock(error="") {
+  startIdleTimer();
+
   app.innerHTML = `
     <div class="lock">
       <div class="avatar">${user.first_name[0]}</div>
@@ -152,14 +182,18 @@ function renderLock(error="") {
       <div class="role">${ROLE}</div>
 
       <div class="pin">
-        ${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''}"></div>`).join("")}
+        ${[0,1,2,3].map(i =>
+          `<div class="dot ${input[i] ? 'fill' : ''}"></div>`
+        ).join("")}
       </div>
 
-      ${error?`<div class="error">${error}</div>`:""}
+      ${error ? `<div class="error">${error}</div>` : ""}
 
       <div class="keyboard">
         ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
-          k===""?`<div></div>`:`<div class="key" onclick="press('${k}')">${k}</div>`
+          k === ""
+            ? `<div></div>`
+            : `<div class="key" onclick="press('${k}')">${k}</div>`
         ).join("")}
       </div>
     </div>
@@ -168,64 +202,49 @@ function renderLock(error="") {
 
 /* ===== INPUT ===== */
 function press(k) {
-  if (k==="⌫") input=input.slice(0,-1);
-  else if (input.length<4) input+=k;
+  startIdleTimer();
+  tg.HapticFeedback.impactOccurred("light");
 
-  if (input.length===4) checkPin();
-  else renderLock();
+  if (k === "⌫") {
+    input = input.slice(0,-1);
+  } else if (input.length < 4) {
+    input += k;
+  }
+
+  if (input.length === 4) {
+    checkPin();
+    return;
+  }
+
+  renderLock();
 }
 
 /* ===== CHECK PIN ===== */
 function checkPin() {
-  if (input===PIN_CODE) openAdmin();
-  else { input=""; renderLock("Неверный PIN"); }
+  startIdleTimer();
+
+  if (input === PIN_CODE) {
+    tg.HapticFeedback.notificationOccurred("success");
+    openAdmin();
+  } else {
+    tg.HapticFeedback.notificationOccurred("error");
+    input = "";
+    renderLock("Неверный PIN");
+  }
 }
 
-/* ===== ADMIN PANEL ===== */
-async function openAdmin() {
-  let adminUI = "";
-
-  if (ROLE==="OWNER") {
-    const { data } = await sb.from("admins").select("*");
-
-    adminUI = `
-      <h3>👥 Админы</h3>
-      ${data.map(a=>`
-        <div>ID ${a.id} — ${a.role}
-          ${a.role!=="OWNER"
-            ? `<button class="danger" onclick="removeAdmin(${a.id})">Удалить</button>`
-            : ""}
-        </div>
-      `).join("")}
-
-      <input id="newAdmin" placeholder="TG ID">
-      <button onclick="addAdmin()">➕ Добавить админа</button>
-    `;
-  }
+/* ===== ADMIN ===== */
+function openAdmin() {
+  startIdleTimer();
 
   app.innerHTML = `
-    <div class="card">
+    <div style="text-align:center">
       <h2>👑 BENTO ADMIN</h2>
       <p>ID: ${user.id}</p>
       <p>Роль: ${ROLE}</p>
-      ${adminUI}
-      <button class="danger" onclick="tg.close()">🚪 Выйти</button>
+      <button onclick="tg.close()">🚪 Выйти</button>
     </div>
   `;
-}
-
-/* ===== ADMIN CRUD ===== */
-async function addAdmin() {
-  const id = document.getElementById("newAdmin").value;
-  if (!id) return;
-
-  await sb.from("admins").insert({ id: Number(id), role:"ADMIN" });
-  openAdmin();
-}
-
-async function removeAdmin(id) {
-  await sb.from("admins").delete().eq("id", id);
-  openAdmin();
 }
 
 /* ===== START ===== */
