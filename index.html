@@ -88,6 +88,17 @@ input {
   text-align:center;
   letter-spacing:6px;
 }
+
+/* 👁️ WATERMARK */
+#watermark {
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  opacity:0.15;
+  font-size:12px;
+  pointer-events:none;
+  z-index:9999;
+}
 </style>
 </head>
 
@@ -95,16 +106,55 @@ input {
 <div id="app">Загрузка…</div>
 
 <script>
+/* ================= 🔒 УРОВЕНЬ 1 — ТОЛЬКО TELEGRAM ================= */
+if (!window.Telegram || !Telegram.WebApp) {
+  document.body.innerHTML = `
+    <h2 style="color:red;text-align:center;margin-top:40px">
+      ❌ Доступ запрещён
+    </h2>
+    <p style="text-align:center">
+      Открой панель только через Telegram
+    </p>
+  `;
+  throw new Error("Not Telegram");
+}
+
+/* ================= 🕵️‍♂️ УРОВЕНЬ 2 — АНТИ-ОТЛАДКА ================= */
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey) ||
+    (e.ctrlKey && e.key === "u")
+  ) {
+    e.preventDefault();
+  }
+});
+
 const tg = Telegram.WebApp;
 tg.expand();
 
 /* ===== НАСТРОЙКИ ===== */
-const OWNER_IDS = [8354848795]; // ← ВСТАВЬ РЕАЛЬНЫЙ TG ID
+const OWNER_IDS = [8354848795];
 const PIN_CODE = "2580";
 /* ===================== */
 
 const app = document.getElementById("app");
 const user = tg.initDataUnsafe?.user;
+
+/* ================= ⏱️ УРОВЕНЬ 4 — АВТОВЫХОД ================= */
+let idleTimer;
+function resetTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    tg.close();
+  }, 3 * 60 * 1000); // 3 минуты
+}
+["click","touchstart","keydown"].forEach(e =>
+  document.addEventListener(e, resetTimer)
+);
+resetTimer();
 
 /* ===== ПРОВЕРКА TELEGRAM ===== */
 if (!user) {
@@ -140,9 +190,18 @@ function checkPin() {
   const value = document.getElementById("pin").value;
   if (value === PIN_CODE) {
     renderMain();
+    addWatermark(); // 👁️
   } else {
     document.getElementById("error").innerText = "Неверный PIN";
   }
+}
+
+/* ================= 👁️ УРОВЕНЬ 3 — WATERMARK ================= */
+function addWatermark() {
+  const wm = document.createElement("div");
+  wm.id = "watermark";
+  wm.innerText = `BENTO • ID ${user.id}`;
+  document.body.appendChild(wm);
 }
 
 /* ===== ГЛАВНОЕ МЕНЮ ===== */
