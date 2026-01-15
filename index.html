@@ -10,66 +10,115 @@
 
 <style>
 :root {
-  --bg:#0b0b0f;
-  --card:#1c1c24;
-  --accent:#8b7cff;
+  --bg:#0e0f13;
+  --glass:rgba(28,28,36,.75);
+  --stroke:rgba(255,255,255,.06);
+  --accent:#7a7cff;
   --text:#fff;
   --muted:#9aa0a6;
   --danger:#ff6b6b;
-  --success:#4cd964;
 }
 
-* { box-sizing:border-box; font-family:-apple-system; }
+* {
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
 body {
   margin:0;
-  background:radial-gradient(circle at top,#14141c,#07070b);
+  background:radial-gradient(circle at top,#1b1c29,#090a10);
   color:var(--text);
 }
 
 #app {
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  padding:16px;
+}
+
+.panel {
+  width:100%;
+  max-width:380px;
 }
 
 .card {
-  background:var(--card);
+  background:var(--glass);
+  backdrop-filter:blur(16px);
+  border:1px solid var(--stroke);
+  border-radius:20px;
   padding:18px;
-  border-radius:18px;
   margin-bottom:14px;
 }
+
+.header {
+  font-size:22px;
+  font-weight:700;
+}
+
+.user {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.avatar {
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#5f63ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
+
+.muted { color:var(--muted); font-size:14px; }
 
 button,input {
   width:100%;
   padding:14px;
-  border-radius:14px;
+  border-radius:16px;
   border:none;
   font-size:16px;
 }
 
-button { background:var(--accent); color:#fff; }
-input { background:#2a2a33; color:#fff; }
-
-.list {
-  margin-top:10px;
+button {
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
 }
 
-.admin {
+button.secondary {
+  background:#2a2b3a;
+}
+
+button.danger {
+  background:#2a1d1d;
+  color:var(--danger);
+}
+
+input {
+  background:#2a2b3a;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+.list .row {
   display:flex;
   justify-content:space-between;
   align-items:center;
+  padding:12px;
+  background:#242533;
+  border-radius:14px;
   margin-bottom:8px;
-  padding:10px;
-  background:#242430;
-  border-radius:12px;
 }
 
-.admin small { color:var(--muted); }
-
-.danger { background:#2a1d1d; color:var(--danger); }
-.back { color:var(--accent); cursor:pointer; margin-bottom:10px; }
+.back {
+  color:var(--accent);
+  cursor:pointer;
+  margin-bottom:10px;
+}
 </style>
 </head>
 
@@ -87,26 +136,24 @@ tg.expand();
 const user = tg.initDataUnsafe.user;
 
 /* ===== SUPABASE ===== */
-const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(
+  "https://duqqpuitipndkghpqupb.supabase.co",
+  "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
+);
 
 /* ===== CONFIG ===== */
 const PIN = "2580";
-let input = "";
 let ROLE = null;
+let input = "";
 const app = document.getElementById("app");
 
 /* ===== AUTO EXIT ===== */
 let idle;
 function resetIdle() {
   clearTimeout(idle);
-  idle = setTimeout(() => {
-    alert("⏱ Автовыход");
-    tg.close();
-  }, 180000);
+  idle = setTimeout(() => tg.close(), 180000);
 }
-["click","touchstart","keydown"].forEach(e =>
+["click","keydown","touchstart"].forEach(e =>
   document.addEventListener(e, resetIdle)
 );
 
@@ -116,70 +163,78 @@ async function checkAccess() {
   const { data } = await sb.from("admins").select("*").eq("id", user.id).single();
   if (!data) return app.innerHTML = "⛔ Нет доступа";
   ROLE = data.role;
-  renderPin();
+  pinScreen();
 }
 
 /* ===== PIN ===== */
-function renderPin(err="") {
+function pinScreen(err="") {
   app.innerHTML = `
-    <div class="card" style="width:320px;text-align:center">
-      <h2>${user.first_name}</h2>
-      <p>${ROLE}</p>
-      <input placeholder="PIN" maxlength="4" oninput="input=this.value">
-      ${err ? `<p style="color:red">${err}</p>` : ``}
-      <button onclick="checkPin()">Войти</button>
+    <div class="panel">
+      <div class="card">
+        <div class="user">
+          <div class="avatar">${user.first_name[0]}</div>
+          <div>
+            <b>${user.first_name}</b><br>
+            <span class="muted">${ROLE}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <input placeholder="PIN" maxlength="4"
+          oninput="input=this.value">
+        ${err ? `<div class="muted" style="color:#ff6b6b">${err}</div>`:""}
+        <button onclick="checkPin()">Войти</button>
+      </div>
     </div>
   `;
 }
 
 function checkPin() {
   resetIdle();
-  if (input === PIN) renderMain();
-  else renderPin("Неверный PIN");
+  input === PIN ? main() : pinScreen("Неверный PIN");
 }
 
 /* ===== MAIN ===== */
-function renderMain() {
+function main() {
   resetIdle();
   app.innerHTML = `
-    <div style="width:340px">
+    <div class="panel">
       <div class="card">
-        <h2>👑 BENTO</h2>
-        <p>ID: ${user.id}</p>
-        <p>Роль: ${ROLE}</p>
+        <div class="header">👑 BENTO</div>
+        <div class="muted">ID ${user.id} • ${ROLE}</div>
       </div>
 
       ${ROLE==="OWNER"
         ? `<div class="card">
-            <button onclick="openAdmins()">👥 Админы</button>
-          </div>`
-        : ``}
+            <button onclick="admins()">👥 Админы</button>
+          </div>` : ``}
 
       <button class="danger" onclick="tg.close()">🚪 Выйти</button>
     </div>
   `;
 }
 
-/* ===== ADMINS PANEL ===== */
-async function openAdmins() {
+/* ===== ADMINS ===== */
+async function admins() {
   resetIdle();
-  const { data } = await sb.from("admins").select("*").order("created_at");
+  const { data } = await sb.from("admins").select("*");
 
   app.innerHTML = `
-    <div style="width:340px">
-      <div class="back" onclick="renderMain()">← Назад</div>
+    <div class="panel">
+      <div class="back" onclick="main()">← Назад</div>
 
       <div class="card">
-        <input id="newId" placeholder="Telegram ID">
+        <input id="aid" placeholder="Telegram ID">
         <button onclick="addAdmin()">➕ Добавить ADMIN</button>
       </div>
 
       <div class="card list">
         ${data.map(a=>`
-          <div class="admin">
+          <div class="row">
             <div>
               <b>${a.role}</b><br>
-              <small>ID ${a.id}</small>
+              <small class="muted">ID ${a.id}</small>
             </div>
             ${a.role!=="OWNER"
               ? `<button class="danger" onclick="delAdmin(${a.id})">✖</button>`
@@ -192,17 +247,16 @@ async function openAdmins() {
 }
 
 async function addAdmin() {
-  const id = document.getElementById("newId").value;
+  const id = document.getElementById("aid").value;
   if (!id) return;
-
   await sb.from("admins").insert({ id, role:"ADMIN" });
-  openAdmins();
+  admins();
 }
 
 async function delAdmin(id) {
   if (!confirm("Удалить админа?")) return;
   await sb.from("admins").delete().eq("id", id);
-  openAdmins();
+  admins();
 }
 
 /* ===== START ===== */
