@@ -80,6 +80,12 @@ button.danger{background:#2a1d1d;color:var(--danger)}
 .admin{display:flex;justify-content:space-between;align-items:center;
   padding:14px;background:#1b1c28;border-radius:18px;margin-top:12px}
 .admin-del{color:var(--danger);cursor:pointer}
+input,select{
+  width:100%;padding:14px;border-radius:14px;
+  border:1px solid var(--stroke);
+  background:#1f2030;color:white;
+  margin-top:12px;
+}
 </style>
 </head>
 
@@ -99,7 +105,7 @@ const sb = supabase.createClient(
 let ROLE="", PIN="", input="", error=false;
 const app=document.getElementById("app");
 
-/* THEME LOAD */
+/* THEME */
 if(localStorage.getItem("theme")==="light"){
   document.body.classList.add("light");
 }
@@ -168,7 +174,6 @@ function settings(){
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
-    <h3>⚙️ Настройки</h3>
     <button onclick="toggleTheme()">🌗 Сменить тему</button>
     <button onclick="pinScreen()">🔐 Сменить PIN</button>
   </div>`;
@@ -176,10 +181,8 @@ function settings(){
 
 function toggleTheme(){
   document.body.classList.toggle("light");
-  localStorage.setItem(
-    "theme",
-    document.body.classList.contains("light") ? "light" : "dark"
-  );
+  localStorage.setItem("theme",
+    document.body.classList.contains("light")?"light":"dark");
 }
 
 /* PIN CHANGE */
@@ -217,6 +220,14 @@ async function admins(){
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
+
+    <input id="newId" placeholder="Telegram ID">
+    <select id="newRole">
+      <option value="ADMIN">ADMIN</option>
+      <option value="OWNER">OWNER</option>
+    </select>
+    <button onclick="addAdmin()">➕ Добавить админа</button>
+
     ${data.map(a=>`
       <div class="admin">
         <div>ID ${a.id}<br><small>${a.role}</small></div>
@@ -224,6 +235,14 @@ async function admins(){
       </div>
     `).join("")}
   </div>`;
+}
+
+async function addAdmin(){
+  const id=document.getElementById("newId").value.trim();
+  const role=document.getElementById("newRole").value;
+  if(!id) return alert("Введите ID");
+  await sb.from("admins").insert({id:Number(id),role,pin:"0000"});
+  admins();
 }
 
 async function del(id){
