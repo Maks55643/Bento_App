@@ -5,13 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BENTO Admin</title>
 
-<!-- Telegram -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Montserrat -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -25,11 +20,7 @@
   --danger:#ff6b6b;
 }
 
-/* ===== GLOBAL FONT ===== */
-*{
-  box-sizing:border-box;
-  font-family:'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-}
+*{box-sizing:border-box;font-family:'Montserrat',sans-serif}
 
 body{
   margin:0;
@@ -45,7 +36,6 @@ body{
   padding:16px;
 }
 
-/* ===== GLASS ===== */
 .card{
   background:var(--glass);
   backdrop-filter:blur(20px);
@@ -57,24 +47,17 @@ body{
   text-align:center;
 }
 
-/* ===== USER ===== */
 .avatar{
-  width:90px;
-  height:90px;
-  border-radius:50%;
+  width:90px;height:90px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#5f63ff);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:38px;
-  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;font-weight:700;
   margin:0 auto 14px;
 }
 
 .name{font-size:22px;font-weight:600}
 .role{color:var(--muted);margin-bottom:22px}
 
-/* ===== iOS DOTS ===== */
 .dots{
   display:flex;
   justify-content:center;
@@ -83,17 +66,12 @@ body{
 }
 
 .dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
+  width:12px;height:12px;border-radius:50%;
   background:#2b2c3a;
-  transition:.25s;
 }
-
 .dot.fill{background:var(--accent)}
 .dot.error{background:var(--danger)}
 
-/* ===== iOS KEYPAD ===== */
 .keypad{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -101,53 +79,38 @@ body{
 }
 
 .key{
-  height:64px;
-  border-radius:22px;
+  height:64px;border-radius:22px;
   background:#1f2030;
-  font-size:22px;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  font-size:22px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
   cursor:pointer;
 }
 
-.key:active{
-  transform:scale(.96);
-  background:#26283a;
-}
+.key.empty{background:none;pointer-events:none}
 
-.key.empty{
-  background:none;
-  pointer-events:none;
-}
-
-/* ===== MENU ===== */
 .panel{width:100%;max-width:380px}
 
 button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:none;
+  width:100%;padding:14px;
+  border-radius:16px;border:none;
   background:var(--accent);
-  color:white;
-  font-size:16px;
-  font-weight:600;
+  color:white;font-size:16px;font-weight:600;
   margin-top:12px;
 }
 
-button.danger{
-  background:#2a1d1d;
-  color:var(--danger);
-}
+button.danger{background:#2a1d1d;color:var(--danger)}
 
-.back{
-  color:var(--accent);
-  text-align:left;
-  cursor:pointer;
-  margin-bottom:12px;
-  font-weight:500;
+.back{color:var(--accent);cursor:pointer;margin-bottom:12px;text-align:left}
+
+.admin{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#1f2030;
+  border-radius:14px;
+  margin-top:10px;
+  font-size:14px;
 }
 </style>
 </head>
@@ -156,68 +119,46 @@ button.danger{
 <div id="app">⏳</div>
 
 <script>
-/* ===== TELEGRAM ===== */
-if (!Telegram?.WebApp) {
-  document.body.innerHTML = "❌ Только через Telegram";
-  throw new Error();
-}
 const tg = Telegram.WebApp;
 tg.expand();
 const user = tg.initDataUnsafe.user;
 
-/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
   "https://duqqpuitipndkghpqupb.supabase.co",
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
 
-/* ===== CONFIG ===== */
-const PIN = "2580";
-let ROLE = null;
-let input = "";
-let error = false;
-const app = document.getElementById("app");
+const PIN="2580";
+let ROLE=null,input="",error=false;
+const app=document.getElementById("app");
 
 /* ===== AUTO EXIT ===== */
 let idle;
 function resetIdle(){
   clearTimeout(idle);
-  idle = setTimeout(()=>tg.close(),180000);
+  idle=setTimeout(()=>tg.close(),180000);
 }
-["click","touchstart","keydown"].forEach(e=>document.addEventListener(e,resetIdle));
+["click","keydown","touchstart"].forEach(e=>document.addEventListener(e,resetIdle));
 
-/* ===== ACCESS ===== */
+/* ===== START ===== */
 async function start(){
   resetIdle();
-  const {data} = await sb.from("admins").select("*").eq("id",user.id).single();
+  const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE = data.role;
-  pinScreen();
+  ROLE=data.role;
+  pin();
 }
 
 /* ===== PIN ===== */
-function pinScreen(){
-  app.innerHTML = `
-    <div class="card">
-      <div class="avatar">${user.first_name[0]}</div>
-      <div class="name">${user.first_name}</div>
-      <div class="role">${ROLE}</div>
-
-      <div class="dots">
-        ${[0,1,2,3].map(i =>
-          `<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`
-        ).join("")}
-      </div>
-
-      <div class="keypad">
-        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
-          k===""
-            ? `<div class="key empty"></div>`
-            : `<div class="key" onclick="press('${k}')">${k}</div>`
-        ).join("")}
-      </div>
-    </div>
-  `;
+function pin(){
+  app.innerHTML=`
+  <div class="card">
+    <div class="avatar">${user.first_name[0]}</div>
+    <div class="name">${user.first_name}</div>
+    <div class="role">${ROLE}</div>
+    <div class="dots">${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}</div>
+    <div class="keypad">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?`<div class="key empty"></div>`:`<div class="key" onclick="press('${k}')">${k}</div>`).join("")}</div>
+  </div>`;
 }
 
 function press(k){
@@ -226,48 +167,75 @@ function press(k){
   else if(input.length<4) input+=k;
   error=false;
   if(input.length===4) return setTimeout(checkPin,180);
-  pinScreen();
+  pin();
 }
 
 function checkPin(){
   if(input===PIN) menu();
-  else{
-    input="";
-    error=true;
-    pinScreen();
-  }
+  else{input="";error=true;pin();}
 }
 
 /* ===== MENU ===== */
 function menu(){
   resetIdle();
   app.innerHTML=`
-    <div class="panel">
-      <div class="card">
-        <h2>👑 BENTO ADMIN</h2>
-        <p>${user.first_name} • ${ROLE}</p>
-
-        <button onclick="openSection('Заявки')">📨 Заявки</button>
-        ${ROLE==="OWNER"?`<button onclick="openSection('Админы')">👥 Админы</button>`:""}
-        <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
-        <button onclick="openSection('Настройки')">⚙️ Настройки</button>
-        <button class="danger" onclick="tg.close()">🚪 Выйти</button>
-      </div>
+  <div class="panel">
+    <div class="card">
+      <h2>👑 BENTO ADMIN</h2>
+      <p>${user.first_name} • ${ROLE}</p>
+      <button onclick="openSection('Заявки')">📨 Заявки</button>
+      ${ROLE==="OWNER"?`<button onclick="admins()">👥 Админы</button>`:""}
+      <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
+      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
+      <button class="danger" onclick="tg.close()">🚪 Выйти</button>
     </div>
-  `;
+  </div>`;
+}
+
+/* ===== ADMINS ===== */
+async function admins(){
+  resetIdle();
+  const {data}=await sb.from("admins").select("*").order("role");
+  app.innerHTML=`
+  <div class="panel">
+    <div class="card">
+      <div class="back" onclick="menu()">← Назад</div>
+      <h3>👥 Админы</h3>
+      <input id="aid" placeholder="Telegram ID">
+      <button onclick="addAdmin()">➕ Добавить</button>
+      ${data.map(a=>`
+        <div class="admin">
+          <div>ID ${a.id}<br><small>${a.role}</small></div>
+          ${a.id!==user.id?`<button class="danger" onclick="delAdmin(${a.id})">✖</button>`:""}
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+async function addAdmin(){
+  const id=Number(document.getElementById("aid").value);
+  if(!id) return;
+  await sb.from("admins").insert({id,role:"ADMIN"});
+  admins();
+}
+
+async function delAdmin(id){
+  if(confirm("Удалить админа?")){
+    await sb.from("admins").delete().eq("id",id);
+    admins();
+  }
 }
 
 function openSection(name){
   resetIdle();
   app.innerHTML=`
-    <div class="panel">
-      <div class="card">
-        <div class="back" onclick="menu()">← Назад</div>
-        <h2>${name}</h2>
-        <p style="color:var(--muted)">Раздел в разработке</p>
-      </div>
+  <div class="panel">
+    <div class="card">
+      <div class="back" onclick="menu()">← Назад</div>
+      <h2>${name}</h2>
+      <p style="color:var(--muted)">Раздел в разработке</p>
     </div>
-  `;
+  </div>`;
 }
 
 start();
