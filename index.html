@@ -200,8 +200,21 @@ function renderMain() {
 
     <div class="card menu">
       <button onclick="openSection('Заявки')">📨 Заявки</button>
-      ${ROLE==="OWNER" ? `<button onclick="openLogs()">📜 Логи</button>` : ""}
-      <button class="exit" onclick="addLog('warn','🚪 Выход'); tg.close()">Выйти</button>
+
+      ${ROLE === "OWNER" 
+        ? `<button onclick="openSection('Админы')">👥 Админы</button>` 
+        : ``}
+
+      <button onclick="openSection('Блэклист')">⛔ Блэклист</button>
+      <button onclick="openSection('Настройки')">⚙️ Настройки</button>
+
+      ${ROLE === "OWNER"
+        ? `<button onclick="openLogs()">📜 Логи действий</button>`
+        : ``}
+
+      <button class="exit" onclick="addLog('warn','🚪 Выход из панели'); tg.close()">
+        🚪 Выйти
+      </button>
     </div>
   `;
 }
