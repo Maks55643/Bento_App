@@ -112,7 +112,7 @@ const sb = supabase.createClient(
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
 
-let ROLE=null, USER_PIN=null, input="", error=false;
+let ROLE=null, USER_PIN="", input="", error=false;
 const app=document.getElementById("app");
 
 /* AUTO EXIT */
@@ -127,8 +127,8 @@ async function start(){
   resetIdle();
   const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE=data.role;
-  USER_PIN=data.pin;
+  ROLE = data.role;
+  USER_PIN = String(data.pin).trim(); // ✅ ИСПРАВЛЕНИЕ
   pin();
 }
 
@@ -139,8 +139,18 @@ function pin(){
     <div class="avatar">${user.first_name[0]}</div>
     <div class="name">${user.first_name}</div>
     <div class="role">${ROLE}</div>
-    <div class="dots">${[0,1,2,3].map(i=>`<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`).join("")}</div>
-    <div class="keypad">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?`<div class="key empty"></div>`:`<div class="key" onclick="press('${k}')">${k}</div>`).join("")}</div>
+    <div class="dots">
+      ${[0,1,2,3].map(i=>`
+        <div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>
+      `).join("")}
+    </div>
+    <div class="keypad">
+      ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
+        k==="" 
+          ? `<div class="key empty"></div>`
+          : `<div class="key" onclick="press('${k}')">${k}</div>`
+      ).join("")}
+    </div>
   </div>`;
 }
 
@@ -153,8 +163,13 @@ function press(k){
 }
 
 function checkPin(){
-  if(input===USER_PIN) welcome();
-  else{input="";error=true;pin();}
+  if(input === USER_PIN){
+    welcome();
+  } else {
+    input="";
+    error=true;
+    pin();
+  }
 }
 
 /* WELCOME */
@@ -192,7 +207,13 @@ function settings(){
       <div class="back" onclick="menu()">← Назад</div>
       <h3>🔐 Новый PIN</h3>
       <div class="dots">${[0,1,2,3].map(()=>`<div class="dot"></div>`).join("")}</div>
-      <div class="keypad">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>k===""?`<div class="key empty"></div>`:`<div class="key" onclick="pinChange('${k}')">${k}</div>`).join("")}</div>
+      <div class="keypad">
+        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k =>
+          k==="" 
+            ? `<div class="key empty"></div>`
+            : `<div class="key" onclick="pinChange('${k}')">${k}</div>`
+        ).join("")}
+      </div>
     </div>
   </div>`;
 }
@@ -203,7 +224,7 @@ async function pinChange(k){
   document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("fill",input[i]));
   if(input.length===4){
     await sb.from("admins").update({pin:input}).eq("id",user.id);
-    USER_PIN=input;
+    USER_PIN = input;
     menu();
   }
 }
