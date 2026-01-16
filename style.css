@@ -1,170 +1,121 @@
-:root{
-  --bg:#0e0f14;
-  --glass:rgba(255,255,255,.08);
-  --stroke:rgba(255,255,255,.12);
-  --accent:#6a7cff;
-  --text:#fff;
-  --muted:#9aa0a6;
-  --danger:#ff6b6b;
+* {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
 }
 
-body.light{
-  --bg:#f3f4f8;
-  --glass:rgba(255,255,255,.85);
-  --stroke:rgba(0,0,0,.08);
-  --text:#111;
-  --muted:#555;
+body {
+  margin: 0;
+  background: #0e0f14;
+  color: #fff;
 }
 
-*{
-  box-sizing:border-box;
-  font-family:'Montserrat',sans-serif;
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity .4s ease, transform .4s ease;
 }
 
-html,body{
-  margin:0;
-  height:100%;
-  background:var(--bg);
-  color:var(--text);
+.screen.active {
+  display: flex;
 }
 
-body{
-  overflow:hidden;
+.logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg,#7a7cff,#5f63ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
 }
 
-/* ---------- SCREENS ---------- */
-.screen{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:
-    env(safe-area-inset-top)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
-  opacity:0;
-  pointer-events:none;
-  transition:.4s ease;
+.title {
+  margin-top: 16px;
+  opacity: .7;
 }
 
-.screen.active{
-  opacity:1;
-  pointer-events:auto;
+.loader {
+  width: 40px;
+  margin-top: 24px;
+  animation: spin 1s linear infinite;
 }
 
-/* ---------- LOADER ---------- */
-.loader-card{
-  text-align:center;
+.loader circle {
+  stroke: #7a7cff;
+  stroke-width: 4;
+  fill: none;
 }
 
-.logo{
-  width:84px;
-  height:84px;
-  border-radius:22px;
-  background:linear-gradient(135deg,#6a7cff,#4b5cff);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:40px;
-  font-weight:700;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.title{
-  margin-top:14px;
-  letter-spacing:3px;
-  opacity:.7;
+.card {
+  width: 90%;
+  max-width: 340px;
+  background: #1a1b22;
+  border-radius: 28px;
+  padding: 24px;
+  text-align: center;
 }
 
-.loader{
-  margin-top:24px;
-  width:40px;
-  height:40px;
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin-bottom: 12px;
 }
 
-.loader circle{
-  stroke:var(--accent);
-  stroke-dasharray:90;
-  stroke-linecap:round;
-  animation:spin 1.2s linear infinite;
+.username {
+  font-weight: 600;
 }
 
-@keyframes spin{
-  from{stroke-dashoffset:90;transform:rotate(0)}
-  to{stroke-dashoffset:0;transform:rotate(360deg)}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
 }
 
-/* ---------- CARD ---------- */
-.card{
-  width:100%;
-  max-width:360px;
-  background:var(--glass);
-  border:1px solid var(--stroke);
-  border-radius:28px;
-  padding:26px;
-  text-align:center;
-  backdrop-filter:blur(20px);
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #444;
 }
 
-/* ---------- PIN ---------- */
-.avatar{
-  width:88px;
-  height:88px;
-  border-radius:50%;
-  margin:0 auto 14px;
-  background-size:cover;
-  background-position:center;
-  box-shadow:0 0 20px rgba(106,124,255,.45);
+.dots span.filled {
+  background: #7a7cff;
 }
 
-.user-name{font-size:18px;font-weight:600}
-.user-role{font-size:13px;color:var(--muted)}
-
-.dots{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  margin:22px 0;
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:#333;
+.pad button {
+  height: 56px;
+  border-radius: 16px;
+  background: #2a2b34;
+  color: #fff;
+  border: none;
+  font-size: 20px;
 }
 
-.dot.fill{background:var(--accent)}
-.dot.error{background:var(--danger)}
-
-.keypad{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
+.menu button {
+  display: block;
+  width: 240px;
+  margin: 8px 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: #2a2b34;
+  border: none;
+  color: #fff;
 }
-
-.key{
-  height:60px;
-  border-radius:20px;
-  background:rgba(255,255,255,.08);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  font-weight:600;
-}
-
-/* ---------- MENU ---------- */
-.menu-item{
-  background:rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:16px;
-  margin-bottom:12px;
-  display:flex;
-  gap:12px;
-  align-items:center;
-  font-size:16px;
-}
-
-.menu-item.exit{color:var(--danger)}
