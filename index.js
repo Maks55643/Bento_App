@@ -42,9 +42,22 @@ function toggleTheme(){
     document.body.classList.contains("light")?"light":"dark");
 }
 
+function showLoader(){
+  app.innerHTML = `
+    <div class="loader-screen">
+      <div class="loader-card">
+        <div class="loader-logo">B</div>
+        <div class="loader-text">BENTO TEAM</div>
+      </div>
+    </div>
+  `;
+}
+
 /* START */
 async function start(){
   resetInactivity();
+
+  showLoader();
 
   if(!user || !user.id){
     app.innerHTML = "⛔ Откройте приложение через Telegram";
@@ -65,7 +78,7 @@ async function start(){
   ROLE = String(data.role || "").toLowerCase().trim();
   PIN  = String(data.pin).trim();
 
-  drawPin();
+  setTimeout(drawPin, 700);
 }
 
 /* PIN */
