@@ -154,12 +154,15 @@ function drawPin(){
         ).join("")}
       </div>
 
-      <div class="keypad">
-        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>{
-          if(k==="") return `<div class="key empty"></div>`;
-          return `<div class="key" onclick="press('${k}')">${k}</div>`;
-        }).join("")}
-      </div>
+      <div class="${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>{
+  if(k==="") return `<div class="key empty"></div>`;
+  return `
+    <div class="key"
+         onclick="press('${k}')"
+         ontouchstart="press('${k}')">
+      ${k}
+    </div>`;
+}).join("")}
     </div>`;
 }
 
