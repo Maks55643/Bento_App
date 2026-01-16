@@ -112,6 +112,7 @@ try{
 
   if(!data){
     loading.innerHTML = "⛔ Нет доступа";
+    showApp();
     return;
   }
 
