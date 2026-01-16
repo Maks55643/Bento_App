@@ -321,14 +321,21 @@ function welcome(){
     </div>
   `;
 
-  setTimeout(menu, 1800);
+  setTimeout(() => {
+  const el = document.querySelector(".welcome-screen");
+  if(el){
+    el.classList.add("fade-out");
+  }
+
+  setTimeout(menu, 350); // ⬅️ после fade-out
+}, 1500);
 }
 
 /* MENU */
 function menu(){
   resetInactivity();
   app.innerHTML = `
-    <div class="card">
+    <div class="card fade-in">
       <div class="menu-title">👑 BENTO ADMIN</div>
 
       <div class="menu-item" onclick="settings()">⚙️ Настройки</div>
