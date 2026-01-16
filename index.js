@@ -358,18 +358,110 @@ function settings(){
     </div>`;
 }
 
+let adminsCache = [];
+
+async function loadAdmins(){
+  const { data, error } = await sb
+    .from("admins")
+    .select("id, role")
+    .order("role", { ascending: false });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  function renderAdmins(){
+  const list = document.getElementById("adminList");
+  if(!list) return;
+
+  list.innerHTML = adminsCache.map(a => `
+    <div class="admin-item">
+      <div class="admin-id">ID ${a.id}</div>
+      <div class="admin-role">${a.role.toUpperCase()}</div>
+    </div>
+  `).join("");
+}
+
+  adminsCache = data;
+  renderAdmins();
+}
+
 /* ADMINS */
-async function adminPanel(){
-  const {data}=await sb.from("admins").select("*");
-  app.innerHTML=`
-    <div class="card">
-      <div class="menu-item" onclick="menu()">← Назад</div>
-      ${data.map(a=>`
-        <div class="menu-item">
-          ${a.id} | ${a.role}
-        </div>`).join("")}
-    </div>`;
+function adminPanel(){
+  app.innerHTML = `
+    <div class="card admin-card fade-in">
+
+      <div class="admin-header" onclick="menu()">← Назад</div>
+
+      <div class="admin-form">
+        <input
+          class="admin-input"
+          type="number"
+          placeholder="Telegram ID"
+          id="newAdminId"
+        />
+
+        <select class="admin-select" id="newAdminRole">
+          <option value="admin">ADMIN</option>
+          <option value="owner">OWNER</option>
+        </select>
+
+        <button class="admin-btn" onclick="addAdmin()">
+          + Добавить админа
+        </button>
+      </div>
+
+      <div class="admin-list" id="adminList">
+        <div class="admin-item">Загрузка...</div>
+      </div>
+
+    </div>
+  `;
+
+  loadAdmins(); // 🔥 сразу грузим
+}
+
+function addAdmin(){
+  tg.HapticFeedback.impactOccurred("light");
+
+  const id = document.getElementById("newAdminId").value;
+  const role = document.getElementById("newAdminRole").value;
+
+  if(!id) return;
+
+  alert(`Добавить ID ${id} с ролью ${role}`);
+}
+
+async function addAdmin(){
+  const id = document.getElementById("newAdminId").value;
+  const role = document.getElementById("newAdminRole").value;
+
+  if(!id) return;
+
+  tg.HapticFeedback.impactOccurred("light");
+
+  const { error } = await sb
+    .from("admins")
+    .insert({ id: Number(id), role });
+
+  if(error){
+    tg.HapticFeedback.notificationOccurred("error");
+    alert("Ошибка добавления");
+    return;
+  }
+
+  document.getElementById("newAdminId").value = "";
+  loadAdmins(); // 🔥 LIVE REFRESH
 }
 
 /* ===== START ===== */
 start();
+sb.channel("admins-live")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "admins" },
+    () => loadAdmins()
+  )
+  .subscribe();
+
