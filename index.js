@@ -120,25 +120,46 @@ function faceID(){
 }
 
 function menu(){
-  app.innerHTML=`
-  <div class="card">
-    <h2>BENTO ADMIN</h2>
-    <p>${user.first_name} • ${ROLE}</p>
-    <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
-    <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
-  </div>`;
+  resetInactivity();
+
+  let html = `
+    <div class="card">
+      <h2>BENTO ADMIN</h2>
+      <p>${user.first_name} • ${ROLE}</p>
+  `;
+
+  if(ROLE === "owner"){
+    html += `<button class="big-btn" onclick="adminPanel()">🛡 Админы</button>`;
+  }
+
+  html += `
+      <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
+      <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
+    </div>
+  `;
+
+  app.innerHTML = html;
 }
 
-window.settings=function(){
-  app.innerHTML=`
-  <div class="card">
-    <div class="back" onclick="menu()">← Назад</div>
-    <button class="big-btn" onclick="toggleTheme()">🌗 Сменить тему</button>
-  </div>`;
+function settings(){
+  resetInactivity();
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="back" onclick="menu()">← Назад</div>
+
+      <h3>Настройки</h3>
+
+      <button class="big-btn" onclick="toggleTheme()">
+        🌗 Сменить тему
+      </button>
+    </div>
+  `;
 }
 
 start();
 window.menu = menu;
+window.settings = settings;
 window.faceID = faceID;
 window.toggleTheme = toggleTheme;
 window.resetInactivity = resetInactivity;
