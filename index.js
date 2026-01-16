@@ -95,11 +95,20 @@ async function start(){
   localStorage.removeItem(getAttemptsKey(user.id));
   attempts = 0;
 
-  const { data } = await sb
+  let data;
+try{
+  const res = await sb
     .from("admins")
     .select("*")
     .eq("id", user.id)
     .single();
+
+  data = res.data;
+}catch(e){
+  loading.innerHTML = "⚠️ Ошибка подключения";
+  showApp(); // 🔥 ОБЯЗАТЕЛЬНО
+  return;
+}
 
   if(!data){
     loading.innerHTML = "⛔ Нет доступа";
@@ -113,6 +122,13 @@ async function start(){
     drawPin();
     showApp();
   }, 1200);
+
+  // страховка от вечной загрузки
+setTimeout(()=>{
+  if(loading.style.display !== "none"){
+    showApp();
+  }
+}, 3000);
 }
 
 /* ===== PIN ===== */
