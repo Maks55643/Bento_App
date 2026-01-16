@@ -255,7 +255,10 @@ window.press = function(k){
 };
 
 async function check(){
+  if(inputLocked) return;
+
   if(Number(input) === Number(PIN)){
+    inputLocked = true; // 🔒 БЛОК
     tg.HapticFeedback.notificationOccurred("success");
     input = "";
     await clearPinErrors();
@@ -496,7 +499,7 @@ async function addAdmin(){
 
   const { error } = await sb
     .from("admins")
-    .insert({ tg_id: Number(id), role, pin:"2580" })
+    .insert({ tg_id: Number(id), role, pin: 2580 })
 
   if(error){
     tg.HapticFeedback.notificationOccurred("error");
