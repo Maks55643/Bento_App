@@ -180,7 +180,7 @@ if(!data){
 }
 
   ROLE = data.role;
-PIN = String(data.pin ?? "").trim().padStart(4, "0");
+  PIN = String(data.pin ?? "").trim().padStart(4, "0");
 
   setTimeout(()=>{
     showApp();
