@@ -165,10 +165,6 @@ if(state === "blocked"){
   .select("*")
   .eq("tg_id", user.id)
   .maybeSingle();
-  
-  /*ПРВОЕРКА УЖАЛИЬ. ПОСЛЕ */
-  console.log("ADMIN DATA >>>", data);
-  console.log("PIN TYPE >>>", typeof data?.pin, data?.pin);
 
 if(error){
   console.error(error);
