@@ -366,3 +366,31 @@ body{
 body.light .welcome-screen{
   background: radial-gradient(circle at top, #ffffff, #e6e8f0);
 }
+
+/* Шапка */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0e0f14;
+}
+
+#app {
+  min-height: 100vh;
+  min-height: 100dvh; /* iOS fix */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body {
+  overflow: hidden;
+}
+
+#app {
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
