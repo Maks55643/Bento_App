@@ -206,11 +206,25 @@ function menu(){
     <h2>BENTO ADMIN</h2>
     <p>${user.first_name} • ${ROLE}</p>
 
-    <button class="big-btn" onclick="adminPanel()">🛡 Админы</button>
+    ${ROLE === "owner" 
+      ? `<button class="big-btn" onclick="adminPanel()">🛡 Админы</button>` 
+      : ``}
+
     <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
     <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
   </div>`;
 }
+
+  async function adminPanel(){
+  if(ROLE !== "owner"){
+    app.innerHTML=`
+      <div class="card">
+        <h3>⛔ Доступ запрещён</h3>
+        <p>Только для владельца</p>
+        <button class="big-btn" onclick="menu()">← Назад</button>
+      </div>`;
+    return;
+  }
 
 /* ADMIN PANEL */
 async function adminPanel(){
