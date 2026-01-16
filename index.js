@@ -24,9 +24,65 @@ function showApp() {
 
 /* ===== SUPABASE ===== */
 const sb = supabase.createClient(
-  "https://mynsrqebdknpceyucayb.supabase.co",
-  "sb_publishable_W37lFR5w6xlYXYtUinLtjA_IEqOP-ci"
+  "https://duqqpuitipndkghpqupb.supabase.co",
+  "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
+
+/* ===== PIN SECURITY (SUPABASE) ===== */
+
+async function getPinState(){
+  // 1. Проверяем blacklist
+  const { data: bl } = await sb
+    .from("blacklist")
+    .select("*")
+    .eq("tg_id", user.id)
+    .single();
+
+  if(bl && Date.now() < bl.blocked_until){
+    blockedUntil = bl.blocked_until;
+    return "blocked";
+  }
+
+  // 2. Проверяем pin_error
+  const { data: pe } = await sb
+    .from("pin_error")
+    .select("*")
+    .eq("tg_id", user.id)
+    .single();
+
+  attempts = pe?.attempts || 0;
+  return "ok";
+}
+
+async function registerPinError(){
+  attempts++;
+
+  await sb.from("pin_error").upsert({
+    tg_id: user.id,
+    attempts,
+    last_attempt: Date.now()
+  });
+
+  if(attempts >= MAX_ATTEMPTS){
+    blockedUntil = Date.now() + BLOCK_TIME;
+
+    await sb.from("blacklist").upsert({
+      tg_id: user.id,
+      reason: "PIN attempts exceeded",
+      blocked_until: blockedUntil
+    });
+
+    await sb.from("pin_error").delete().eq("tg_id", user.id);
+  }
+}
+
+async function clearPinErrors(){
+  attempts = 0;
+  blockedUntil = 0;
+
+  await sb.from("pin_error").delete().eq("tg_id", user.id);
+  await sb.from("blacklist").delete().eq("tg_id", user.id);
+}
 
 /* ===== STATE ===== */
 let user = null;
@@ -81,9 +137,13 @@ async function start(){
 
   user = tg.initDataUnsafe.user;
 
-  blockedUntil = Number(localStorage.getItem(getBlockKey(user.id)) || 0);
-  attempts = Number(localStorage.getItem(getAttemptsKey(user.id)) || 0);
+  const state = await getPinState();
 
+if(state === "blocked"){
+  showApp();
+  showBlockedScreen();
+  return;
+}
   if(Date.now() < blockedUntil){
     setTimeout(()=>{
       showApp();
@@ -195,16 +255,28 @@ window.press = function(k){
   });
 };
 
-function check(){
+async function check(){
   if(input === PIN){
     tg.HapticFeedback.notificationOccurred("success");
-    attempts = 0;
     input = "";
-    inputLocked = false;
-    localStorage.removeItem(getAttemptsKey(user.id));
+    await clearPinErrors();
     welcome();
     return;
   }
+
+  tg.HapticFeedback.notificationOccurred("error");
+  input = "";
+  error = true;
+
+  await registerPinError();
+
+  if(attempts >= MAX_ATTEMPTS){
+    showBlockedScreen();
+    return;
+  }
+
+  drawPin();
+}
 
   tg.HapticFeedback.notificationOccurred("error");
   attempts++;
