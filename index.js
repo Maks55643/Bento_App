@@ -1,5 +1,10 @@
 const tg = Telegram.WebApp;
 
+tg.expand();
+tg.ready();
+tg.setHeaderColor("#0e0f14");
+tg.setBackgroundColor("#0e0f14");
+
 const loading = document.getElementById("loading");
 const app = document.getElementById("app");
 
@@ -7,11 +12,6 @@ function showApp() {
   loading.classList.remove("active");
   app.classList.add("active");
 }
-
-tg.expand();
-tg.ready();
-tg.setHeaderColor("#0e0f14");
-tg.setBackgroundColor("#0e0f14");
 
 const user = tg.initDataUnsafe.user;
 
@@ -50,27 +50,16 @@ function toggleTheme(){
     document.body.classList.contains("light")?"light":"dark");
 }
 
-function showLoader(){
-  app.innerHTML = `
-    <div class="loader-screen">
-      <div class="loader-card">
-        <div class="loader-logo">B</div>
-        <div class="loader-text">BENTO TEAM</div>
-      </div>
-    </div>
-  `;
-}
-
 /* START */
 async function start(){
   resetInactivity();
 
-  showLoader();
-
-  if(!user || !user.id){
-    app.innerHTML = "⛔ Откройте приложение через Telegram";
+  if(!tg.initDataUnsafe?.user){
+    loading.innerHTML = "⛔ Откройте через Telegram";
     return;
   }
+
+  const user = tg.initDataUnsafe.user;
 
   const { data, error } = await sb
     .from("admins")
@@ -79,14 +68,18 @@ async function start(){
     .single();
 
   if(error || !data){
-    app.innerHTML = "⛔ Нет доступа";
+    loading.innerHTML = "⛔ Нет доступа";
     return;
   }
 
-  ROLE = String(data.role || "").toLowerCase().trim();
+  ROLE = String(data.role).toLowerCase().trim();
   PIN  = String(data.pin).trim();
 
-  setTimeout(drawPin, 700);
+  // ⏱️ даём красивую паузу
+  setTimeout(() => {
+    showApp();   // ⬅️ ВАЖНО
+    drawPin();   // ⬅️ ПЕРЕХОД К PIN
+  }, 1200);
 }
 
 /* PIN */
