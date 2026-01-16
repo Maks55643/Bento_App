@@ -121,7 +121,7 @@ try{
   }
 
   ROLE = data.role;
-  PIN = String(data.pin);
+  PIN = String(data.pin).padStart(4, "0");
 
   setTimeout(()=>{
   showApp(); // сначала УБИРАЕМ loader
