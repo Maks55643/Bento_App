@@ -13,7 +13,7 @@ function showApp() {
   app.classList.add("active");
 }
 
-const user = tg.initDataUnsafe.user;
+let user = null;
 
 const sb = supabase.createClient(
   "https://mynsrqebdknpceyucayb.supabase.co",
@@ -21,7 +21,6 @@ const sb = supabase.createClient(
 );
 
 let ROLE="", PIN="", input="", error=false;
-const app=document.getElementById("app");
 
 let attempts = 0;
 let blockedUntil = 0;
