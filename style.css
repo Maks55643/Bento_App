@@ -213,6 +213,60 @@ body{
   cursor:pointer;
 }
 
+.menu-title{
+  font-size:22px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.user-card{
+  background:rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:14px 16px;
+  margin-bottom:20px;
+}
+
+.user-card .name{
+  font-size:16px;
+  font-weight:600;
+}
+
+.user-card .id{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.menu-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.menu-item{
+  background:rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:16px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.menu-item:active{
+  transform:scale(.97);
+  background:rgba(255,255,255,.12);
+}
+
+.menu-item.exit{
+  color:var(--danger);
+}
+
 @keyframes premiumRotate{
   from{transform:rotate(0deg)}
   to{transform:rotate(360deg)}
