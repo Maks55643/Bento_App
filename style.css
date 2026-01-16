@@ -416,3 +416,48 @@ body {
            env(safe-area-inset-bottom)
            env(safe-area-inset-left);
 }
+
+.loader-screen{
+  position:fixed;
+  inset:0;
+  background:#0e0f14;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.loader-card{
+  text-align:center;
+  animation:fadeIn .6s ease;
+}
+
+.loader-logo{
+  width:72px;
+  height:72px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#6a6cff,#4b4fff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:800;
+  color:white;
+  animation:pulse 1.6s infinite;
+}
+
+.loader-text{
+  margin-top:14px;
+  letter-spacing:2px;
+  opacity:.8;
+}
+
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+}
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
