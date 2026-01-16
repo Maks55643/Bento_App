@@ -43,7 +43,9 @@ async function start(){
   resetInactivity();
   const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE=String(data.role).toLowerCase();
+  ROLE = String(data.role || "")
+  .toLowerCase()
+  .trim();
   PIN=String(data.pin).trim();
   drawPin();
 }
@@ -96,14 +98,23 @@ function check(){
 }
 
 function faceID(){
-  app.innerHTML=`
+  app.innerHTML = `
   <div class="card">
     <h3>Face ID</h3>
     <div class="faceid">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 7V5a2 2 0 0 1 2-2h2"/>
+        <path d="M20 7V5a2 2 0 0 0-2-2h-2"/>
+        <path d="M4 17v2a2 2 0 0 0 2 2h2"/>
+        <path d="M20 17v2a2 2 0 0 1-2 2h-2"/>
+        <circle cx="9" cy="10" r="1"/>
+        <circle cx="15" cy="10" r="1"/>
+        <path d="M9 15c.8.7 1.7 1 3 1s2.2-.3 3-1"/>
+      </svg>
       <div class="scan-line"></div>
     </div>
   </div>`;
-  setTimeout(menu,1800);
+  setTimeout(menu, 1800);
 }
 
 function menu(){
@@ -125,3 +136,10 @@ window.settings=function(){
 }
 
 start();
+window.menu = menu;
+window.faceID = faceID;
+window.toggleTheme = toggleTheme;
+window.resetInactivity = resetInactivity;
+window.adminPanel = adminPanel;
+window.addAdmin = addAdmin;
+window.delAdmin = delAdmin;
