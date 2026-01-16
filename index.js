@@ -232,6 +232,8 @@ app.addEventListener("click", e => {
 });
 
 window.press = function(k){
+  if(inputLocked) return; // 🔒 защита от двойного клика
+  
   if(Date.now() < blockedUntil) return;
 
   tg.HapticFeedback.impactOccurred("light");
