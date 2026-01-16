@@ -1,56 +1,32 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>BENTO Admin</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-  <!-- LOADING -->
-  <div id="loading" class="screen active">
-    <div class="logo">B</div>
-    <div class="title">BENTO TEAM</div>
-    <svg class="loader" viewBox="0 0 50 50">
-      <circle cx="25" cy="25" r="20" />
-    </svg>
-  </div>
 
-  <!-- PIN -->
-  <div id="pin" class="screen">
-    <div class="card">
-      <img id="avatar" class="avatar">
-      <div id="username" class="username"></div>
-      <div class="dots" id="dots"></div>
+<!-- LOADER -->
+<div id="loading" class="screen active">
+  <div class="logo">B</div>
+  <div class="title">BENTO TEAM</div>
 
-      <div class="pad" id="pad"></div>
-    </div>
-  </div>
+  <svg class="loader" viewBox="0 0 50 50">
+    <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
+  </svg>
+</div>
 
-  <!-- WELCOME -->
-  <div id="welcome" class="screen">
-    <div class="welcome-icon"></div>
-    <h1>Добро пожаловать</h1>
-    <p>в админ панель <b>BENTO TEAM</b></p>
-  </div>
+<!-- APP -->
+<div id="app" class="screen"></div>
 
-  <!-- MENU -->
-  <div id="menu" class="screen">
-    <div class="menu">
-      <button>📨 Заявки</button>
-      <button id="adminsTab">👥 Админы</button>
-      <button>⛔ Блэклист</button>
-      <button>⚙ Настройки</button>
-      <button id="logout">🚪 Выйти</button>
-    </div>
-  </div>
-
-  <script src="./index.js"></script>
+<script src="./index.js"></script>
 </body>
 </html>
