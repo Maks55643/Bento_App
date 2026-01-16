@@ -58,7 +58,7 @@ async function start(){
     return;
   }
 
-  const user = tg.initDataUnsafe.user;
+  user = tg.initDataUnsafe.user; // ✅ ВАЖНО
 
   const { data, error } = await sb
     .from("admins")
@@ -74,10 +74,9 @@ async function start(){
   ROLE = String(data.role).toLowerCase().trim();
   PIN  = String(data.pin).trim();
 
-  // ⏱️ даём красивую паузу
   setTimeout(() => {
-    showApp();   // ⬅️ ВАЖНО
-    drawPin();   // ⬅️ ПЕРЕХОД К PIN
+    showApp();
+    drawPin();
   }, 1200);
 }
 
