@@ -162,11 +162,8 @@ function drawPin(){
 }
 
 window.press = function(k){
-  if (pressLocked) return;          // ⛔ защита
-  pressLocked = true;
-  setTimeout(()=>pressLocked=false, 120); // 🔓 разблокировка
-
   tg.HapticFeedback.impactOccurred("light");
+
   if(Date.now() < blockedUntil) return;
 
   if(k === "⌫") {
@@ -176,7 +173,12 @@ window.press = function(k){
   }
 
   error = false;
-  input.length === 4 ? check() : drawPin();
+
+  if(input.length === 4){
+    check();
+  } else {
+    drawPin();
+  }
 };
 
 function check(){
