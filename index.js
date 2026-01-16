@@ -183,12 +183,13 @@ window.press = function(k){
   error = false;
 
   if(input.length === 4){
-    inputLocked = true;   // 🔒 ЛОЧИМ
+  setTimeout(() => {
+    inputLocked = true;
     check();
-  } else {
-    drawPin();
-  }
-};
+  }, 0);
+} else {
+  drawPin();
+}
 
 function check(){
   if(input === PIN){
