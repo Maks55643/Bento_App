@@ -256,9 +256,9 @@ window.press = function(k){
 
 async function check(){
   if(inputLocked) return;
+  inputLocked = true;
 
-  if(Number(input) === Number(PIN)){
-    inputLocked = true; // 🔒 БЛОК
+  if(input === PIN){
     tg.HapticFeedback.notificationOccurred("success");
     input = "";
     await clearPinErrors();
@@ -269,6 +269,7 @@ async function check(){
   tg.HapticFeedback.notificationOccurred("error");
   input = "";
   error = true;
+  inputLocked = false;
 
   await registerPinError();
 
@@ -478,6 +479,7 @@ function adminPanel(){
   loadAdmins(); // 🔥 сразу грузим
 }
 
+/*
 function addAdmin(){
   tg.HapticFeedback.impactOccurred("light");
 
@@ -487,7 +489,7 @@ function addAdmin(){
   if(!id) return;
 
   alert(`Добавить ID ${id} с ролью ${role}`);
-}
+} */
 
 async function addAdmin(){
   const id = document.getElementById("newAdminId").value;
@@ -499,7 +501,7 @@ async function addAdmin(){
 
   const { error } = await sb
     .from("admins")
-    .insert({ tg_id: Number(id), role, pin: 2580 })
+    .insert({ tg_id: Number(id), role, pin:"2580" })
 
   if(error){
     tg.HapticFeedback.notificationOccurred("error");
