@@ -7,9 +7,9 @@ tg.setBackgroundColor("#0e0f14");
 const loading = document.getElementById("loading");
 const app = document.getElementById("app");
 
-function showApp(){
-  loading.classList.remove("active");
-  app.classList.add("active");
+function showApp() {
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "flex";
 }
 
 /* SUPABASE */
