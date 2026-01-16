@@ -36,8 +36,12 @@ function resetInactivity(){
 }
 
 /* THEME */
-if(localStorage.getItem("theme")==="light")
+// DARK THEME BY DEFAULT
+if(localStorage.getItem("theme")==="light"){
   document.body.classList.add("light");
+}else{
+  document.body.classList.remove("light");
+}
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme",
