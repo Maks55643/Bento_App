@@ -1,5 +1,13 @@
 const tg = Telegram.WebApp;
 
+const loading = document.getElementById("loading");
+const app = document.getElementById("app");
+
+function showApp() {
+  loading.classList.remove("active");
+  app.classList.add("active");
+}
+
 tg.expand();
 tg.ready();
 tg.setHeaderColor("#0e0f14");
