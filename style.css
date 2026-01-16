@@ -1,121 +1,143 @@
-* {
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+:root{
+  --bg:#0e0f14;
+  --card:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.12);
+  --text:#fff;
+  --muted:#9aa0a6;
+  --accent:#6a7cff;
+  --danger:#ff6b6b;
 }
 
-body {
-  margin: 0;
-  background: #0e0f14;
-  color: #fff;
+body.light{
+  --bg:#f2f3f7;
+  --card:rgba(0,0,0,.06);
+  --stroke:rgba(0,0,0,.1);
+  --text:#0f1220;
+  --muted:#5f6368;
 }
 
-.screen {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  transition: opacity .4s ease, transform .4s ease;
+*{box-sizing:border-box;font-family:'Montserrat',sans-serif}
+
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
 }
 
-.screen.active {
-  display: flex;
+body{overflow:hidden}
+
+.screen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:.4s;
 }
 
-.logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: linear-gradient(135deg,#7a7cff,#5f63ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  font-weight: 700;
+.screen.active{
+  opacity:1;
+  pointer-events:all;
 }
 
-.title {
-  margin-top: 16px;
-  opacity: .7;
+.logo{
+  width:90px;height:90px;
+  border-radius:26px;
+  background:linear-gradient(135deg,#6a7cff,#4b5cff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  font-weight:700;
 }
 
-.loader {
-  width: 40px;
-  margin-top: 24px;
-  animation: spin 1s linear infinite;
+.title{
+  margin-top:16px;
+  letter-spacing:3px;
+  opacity:.75;
 }
 
-.loader circle {
-  stroke: #7a7cff;
-  stroke-width: 4;
-  fill: none;
+.loader{
+  margin-top:28px;
+  width:42px;height:42px;
+}
+.loader circle{
+  stroke:#6a7cff;
+  stroke-dasharray:90;
+  animation:spin 1.2s linear infinite;
+}
+@keyframes spin{
+  from{stroke-dashoffset:90;transform:rotate(0)}
+  to{stroke-dashoffset:0;transform:rotate(360deg)}
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* CARD */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--stroke);
+  border-radius:28px;
+  padding:26px;
+  width:100%;
+  max-width:360px;
+  text-align:center;
 }
 
-.card {
-  width: 90%;
-  max-width: 340px;
-  background: #1a1b22;
-  border-radius: 28px;
-  padding: 24px;
-  text-align: center;
+.avatar{
+  width:96px;height:96px;
+  border-radius:50%;
+  margin:0 auto 14px;
+  background-size:cover;
+  background-position:center;
 }
 
-.avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  margin-bottom: 12px;
-}
+.user-name{font-size:20px;font-weight:600}
+.user-role{font-size:14px;color:var(--muted);margin-bottom:20px}
 
-.username {
-  font-weight: 600;
-}
+/* PIN */
+.dots{display:flex;justify-content:center;gap:14px;margin:22px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#2b2c3a}
+.dot.fill{background:var(--accent)}
+.dot.error{background:var(--danger)}
 
-.dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 16px 0;
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.key{
+  height:60px;
+  border-radius:20px;
+  background:#1f2030;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
 }
+.key.empty{background:none}
 
-.dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #444;
+/* MENU */
+.menu-title{font-size:22px;font-weight:700;margin-bottom:18px}
+.menu-item{
+  background:var(--card);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
 }
+.menu-item.exit{color:var(--danger)}
 
-.dots span.filled {
-  background: #7a7cff;
-}
+.hidden-value{letter-spacing:3px}
+.eye{margin-left:8px}
 
-.pad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+/* WELCOME */
+.welcome-screen{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-
-.pad button {
-  height: 56px;
-  border-radius: 16px;
-  background: #2a2b34;
-  color: #fff;
-  border: none;
-  font-size: 20px;
-}
-
-.menu button {
-  display: block;
-  width: 240px;
-  margin: 8px 0;
-  padding: 14px;
-  border-radius: 16px;
-  background: #2a2b34;
-  border: none;
-  color: #fff;
-}
+.welcome-card{text-align:center;animation:pop .6s}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
