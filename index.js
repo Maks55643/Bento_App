@@ -170,6 +170,8 @@ app.addEventListener("click", e => {
 
 window.press = function(k){
   if(inputLocked) return;
+  inputLocked = true;
+
   if(Date.now() < blockedUntil) return;
 
   tg.HapticFeedback.impactOccurred("light");
@@ -181,17 +183,15 @@ window.press = function(k){
   }
 
   error = false;
-
-  // 🔥 ВСЕГДА сначала рисуем UI
   drawPin();
 
-  // 🔥 а уже ПОТОМ проверяем
   if(input.length === 4){
-    inputLocked = true;
-    requestAnimationFrame(() => {
-      check();
-    });
+    check();
   }
+
+  requestAnimationFrame(() => {
+    inputLocked = false;
+  });
 };
 
 function check(){
