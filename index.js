@@ -266,6 +266,4 @@ function updateBlockTimer(){
 /* ===== WELCOME / MENU / SETTINGS / ADMINS ===== */
 /* — ОСТАВЛЕНО БЕЗ ИЗМЕНЕНИЙ — */
 
-document.addEventListener("DOMContentLoaded", () => {
-  start();
-});
+start();
