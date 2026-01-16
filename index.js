@@ -174,19 +174,23 @@ window.press = function(k){
 
   tg.HapticFeedback.impactOccurred("light");
 
-  if(k === "⌫"){
+  if(k === "⌫") {
     input = input.slice(0,-1);
-  }else if(input.length < 4){
+  } else if(input.length < 4) {
     input += String(k);
   }
 
   error = false;
 
+  // 🔥 ВСЕГДА сначала рисуем UI
+  drawPin();
+
+  // 🔥 а уже ПОТОМ проверяем
   if(input.length === 4){
     inputLocked = true;
-    check();
-  }else{
-    drawPin();
+    requestAnimationFrame(() => {
+      check();
+    });
   }
 };
 
