@@ -264,3 +264,8 @@ body{
   pointer-events: auto;
   touch-action: manipulation;
 }
+
+.key{
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
