@@ -80,6 +80,7 @@ body{
 /* ===== CARD ===== */
 
 .card{
+  transform: translateY(-20px);
   background:var(--card);
   backdrop-filter:blur(20px);
   border:1px solid var(--stroke);
