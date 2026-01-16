@@ -73,6 +73,7 @@ async function start(){
 
   if(!tg.initDataUnsafe?.user){
     loading.innerHTML = "⛔ Откройте через Telegram";
+    showApp();
     return;
   }
 
@@ -120,6 +121,7 @@ try{
   PIN = String(data.pin);
 
   setTimeout(()=>{
+    app.style.display = "flex";
     drawPin();
     showApp();
   }, 1200);
