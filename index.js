@@ -193,53 +193,41 @@ async function adminPanel(){
       <h3>Админы</h3>
 
       <div class="admin-list clean">
-  ${data.map(a => `
-    <div class="admin-row">
-      <div class="admin-main">
-        <div class="admin-id">
-          <b>ID</b>
-          <span class="secret"
-                onclick="toggleAdminSecret(this)"
-                data-open="0"
-                data-id="${a.id}"
-                data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
-            ••••••••
-            <span class="eye">👁</span>
-          </span>
-        </div>
+        ${data.map(a => `
+          <div class="admin-row">
+            <div class="admin-main">
+              <div class="admin-id">
+                <b>ID</b>
+                <span class="secret"
+                      onclick="toggleAdminSecret(this)"
+                      data-open="0"
+                      data-id="${a.id}"
+                      data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
+                  ••••••••
+                  <span class="eye">👁</span>
+                </span>
+              </div>
 
-        <div class="admin-role-label">${a.role.toUpperCase()}</div>
+              <div class="admin-role-label">
+                ${a.role.toUpperCase()}
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              ${
+                a.role === "owner"
+                ? `<span class="protected">protected</span>`
+                : `<button class="del-btn" onclick="delAdmin(${a.id})">❌</button>`
+              }
+            </div>
+          </div>
+        `).join("")}
       </div>
 
-      <div class="admin-actions">
-        ${
-          a.role === "owner"
-          ? `<span class="protected">protected</span>`
-          : `<button class="del-btn" onclick="delAdmin(${a.id})">❌</button>`
-        }
-      </div>
+      <button class="big-btn" onclick="addAdmin()">➕ Добавить админа</button>
     </div>
-  `).join("")}
-</div>
-              <div class="admin-info">
-  <div class="admin-role ${a.role}">
-    ${a.role.toUpperCase()}
-  </div>
-
-  <div class="admin-secret"
-     data-open="0"
-     data-id="${a.id}"
-     data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
-
-  <div class="secret-line">
-    <span class="secret-value">ID ••••••••</span>
-    <span class="eye" onclick="toggleAdminSecret(event,this)">👁</span>
-  </div>
-
-  <div class="secret-line">
-    <span class="secret-value">PIN ••••</span>
-  </div>
-</div>
+  `;
+}
 
             <div class="admin-actions">
               ${
@@ -314,14 +302,16 @@ function toggleAdminSecret(el){
   const opened = el.dataset.open === "1";
   const id = el.dataset.id;
   const pin = el.dataset.pin;
+
   const eye = el.querySelector(".eye");
+  const textNode = el.childNodes[0];
 
   if(opened){
-    el.childNodes[0].textContent = "•••••••• ";
+    textNode.textContent = "•••••••• ";
     eye.textContent = "👁";
     el.dataset.open = "0";
   }else{
-    el.childNodes[0].textContent = `ID ${id} | PIN ${pin} `;
+    textNode.textContent = `ID ${id} | PIN ${pin} `;
     eye.textContent = "🙈";
     el.dataset.open = "1";
   }
