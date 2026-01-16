@@ -6,6 +6,8 @@ tg.setBackgroundColor("#0e0f14");
 
 const loading = document.getElementById("loading");
 const app = document.getElementById("app");
+const getBlockKey = id => `bento_blocked_until_${id}`;
+const getAttemptsKey = id => `bento_attempts_${id}`;
 
 function showApp() {
   loading.style.opacity = "0";
@@ -64,20 +66,46 @@ async function start(){
     return;
   }
 
-  user=tg.initDataUnsafe.user;
+  user = tg.initDataUnsafe.user;
 
-  // 🔒 проверка сохранённой блокировки
-const savedBlock = localStorage.getItem(STORAGE_BLOCK_KEY);
+  // ♻️ восстановление блокировки
+  const savedBlockedUntil = Number(localStorage.getItem(getBlockKey(user.id)) || 0);
+  const savedAttempts = Number(localStorage.getItem(getAttemptsKey(user.id)) || 0);
 
-if(savedBlock && Date.now() < Number(savedBlock)){
-  blockedUntil = Number(savedBlock);
+  blockedUntil = savedBlockedUntil;
+  attempts = savedAttempts;
+
+  if(Date.now() < blockedUntil){
+    setTimeout(()=>{
+      showApp();
+      showBlockedScreen();
+    }, 600);
+    return;
+  }
+
+  // ❗ если блокировка истекла — чистим
+  localStorage.removeItem(getBlockKey(user.id));
+  localStorage.removeItem(getAttemptsKey(user.id));
+  attempts = 0;
+
+  const {data} = await sb
+    .from("admins")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if(!data){
+    loading.innerHTML="⛔ Нет доступа";
+    return;
+  }
+
+  ROLE = data.role;
+  PIN = String(data.pin);
 
   setTimeout(()=>{
+    drawPin();
     showApp();
-    showBlockedScreen();
-  }, 800);
-
-  return;
+  }, 1200);
 }
 
   const {data}=await sb
@@ -102,6 +130,8 @@ if(savedBlock && Date.now() < Number(savedBlock)){
 
 /* PIN */
 function drawPin(){
+  if(Date.now() < blockedUntil) return; // 🔒 ВАЖНО
+  
   app.innerHTML=`
   <div class="card">
     <div class="avatar" style="background-image:url('${user.photo_url||''}')"></div>
@@ -138,25 +168,27 @@ function check(){
     tg.HapticFeedback.notificationOccurred("success");
     attempts = 0;
     input = "";
+    localStorage.removeItem(getAttemptsKey(user.id));
     welcome();
     return;
   }
 
-  // ❌ неверный PIN
   tg.HapticFeedback.notificationOccurred("error");
   attempts++;
   input = "";
   error = true;
 
+  localStorage.setItem(getAttemptsKey(user.id), attempts);
+
   if(attempts >= MAX_ATTEMPTS){
-  blockedUntil = Date.now() + BLOCK_TIME;
+    blockedUntil = Date.now() + BLOCK_TIME;
 
-  // 💾 сохраняем блокировку
-  localStorage.setItem(STORAGE_BLOCK_KEY, blockedUntil);
+    localStorage.setItem(getBlockKey(user.id), blockedUntil);
+    localStorage.setItem(getAttemptsKey(user.id), attempts);
 
-  showBlockedScreen();
-  return;
-}
+    showBlockedScreen();
+    return;
+  }
 
   drawPin();
 }
