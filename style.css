@@ -301,3 +301,79 @@ body{
     transform: translateY(-10px);
   }
 }
+
+/* ===== ADMIN PANEL ===== */
+
+.admin-card{
+  padding: 22px;
+}
+
+.admin-header{
+  color: #7f8cff;
+  font-size: 15px;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+.admin-form{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.admin-input,
+.admin-select{
+  height: 54px;
+  border-radius: 18px;
+  padding: 0 18px;
+  font-size: 15px;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  outline: none;
+}
+
+.admin-input::placeholder{
+  color: rgba(255,255,255,.4);
+}
+
+.admin-select{
+  appearance: none;
+}
+
+.admin-btn{
+  height: 56px;
+  border-radius: 22px;
+  border: none;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg,#6f7cff,#7cf7d4);
+}
+
+.admin-btn:active{
+  transform: scale(.98);
+}
+
+.admin-list{
+  margin-top: 10px;
+}
+
+.admin-item{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 14px 18px;
+}
+
+.admin-id{
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.admin-role{
+  font-size: 12px;
+  opacity: .6;
+  margin-top: 2px;
+}
