@@ -8,11 +8,12 @@ tg.setBackgroundColor("#0e0f14");
 const loading = document.getElementById("loading");
 const app = document.getElementById("app");
 
-function showApp() {
-  loading.classList.remove("active");
-  app.classList.add("active");
-}
+function showApp(){
+  loading.style.display = "none";
 
+  app.style.display = "flex";
+  app.style.opacity = "1";
+}
 let user = null;
 
 const sb = supabase.createClient(
