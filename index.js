@@ -124,18 +124,28 @@ function menu(){
 
   app.innerHTML = `
     <div class="card">
-      <h2>BENTO ADMIN</h2>
-      <p style="color:var(--muted);margin-bottom:18px">
-        ${user.first_name} • ${ROLE.toUpperCase()}
-      </p>
+      <div class="menu-title">👑 BENTO ADMIN</div>
 
-      ${ROLE === "owner"
-        ? `<button class="big-btn" onclick="adminPanel()">🛡 Админы</button>`
-        : ``
-      }
+      <div class="user-card">
+        <div class="name">${user.first_name}</div>
+        <div class="id">ID: ${user.id}</div>
+      </div>
 
-      <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
-      <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
+      <div class="menu-list">
+        <div class="menu-item">📩 Заявки</div>
+
+        ${
+          ROLE === "owner"
+          ? `<div class="menu-item" onclick="adminPanel()">👥 Админы</div>`
+          : ``
+        }
+
+        <div class="menu-item">⛔ Блэклист</div>
+
+        <div class="menu-item" onclick="settings()">⚙️ Настройки</div>
+
+        <div class="menu-item exit" onclick="tg.close()">🚪 Выйти</div>
+      </div>
     </div>
   `;
 }
