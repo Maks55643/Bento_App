@@ -150,21 +150,24 @@ function drawPin(){
 
       <div class="dots">
         ${[0,1,2,3].map(i =>
-          `<div class="dot ${input[i] !== undefined ? 'fill' : ''} ${error?'error':''}"></div>`
+          `<div class="dot ${input[i] !== undefined ? 'fill' : ''} ${error ? 'error' : ''}"></div>`
         ).join("")}
       </div>
 
       <div class="keypad">
         ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>{
-          if(k==="") return `<div class="key empty"></div>`;
+          if(k === "") return `<div class="key empty"></div>`;
           return `
             <div class="key"
-            onclick="press('${k}')"
-            ontouchstart="press('${k}')">
-         ${k}
-      </div>`;
-  }).join("")}
-</div>
+                 onclick="press('${k}')"
+                 ontouchstart="press('${k}')">
+              ${k}
+            </div>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
 
 window.press = function(k){
   tg.HapticFeedback.impactOccurred("light");
