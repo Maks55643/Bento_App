@@ -326,18 +326,19 @@ function welcome(){
 /* MENU */
 function menu(){
   resetInactivity();
-  app.innerHTML=`
+  app.innerHTML = `
     <div class="card">
       <div class="menu-title">👑 BENTO ADMIN</div>
 
       <div class="menu-item" onclick="settings()">⚙️ Настройки</div>
 
-      ${ROLE==="owner"
-        ? <div class="menu-item" onclick="adminPanel()">👥 Админы</div>
+      ${ROLE === "owner"
+        ? `<div class="menu-item" onclick="adminPanel()">👥 Админы</div>`
         : ``}
 
       <div class="menu-item exit" onclick="tg.close()">🚪 Выйти</div>
-    </div>`;
+    </div>
+  `;
 }
 
 /* SETTINGS */
