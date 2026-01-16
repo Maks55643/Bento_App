@@ -148,7 +148,7 @@ function drawPin(){
 
       <div class="dots">
         ${[0,1,2,3].map(i =>
-          `<div class="dot ${input[i]?'fill':''} ${error?'error':''}"></div>`
+          `<div class="dot ${input[i] !== undefined ? 'fill' : ''} ${error?'error':''}"></div>`
         ).join("")}
       </div>
 
