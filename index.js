@@ -101,15 +101,37 @@ function welcome(){
   app.innerHTML = `
     <div class="welcome-screen">
       <div class="welcome-card">
-        <img src="bento.png" class="welcome-logo" alt="BENTO">
+
+        <svg class="welcome-svg" width="140" height="140" viewBox="0 0 140 140" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#a1a1a1"/>
+            </linearGradient>
+          </defs>
+
+          <circle cx="70" cy="70" r="62"
+                  stroke="url(#grad)" stroke-width="3"/>
+          <rect x="38" y="40" width="64" height="64" rx="16"
+                stroke="url(#grad)" stroke-width="3"/>
+          <path d="M52 62h36M52 78h24"
+                stroke="url(#grad)"
+                stroke-width="4"
+                stroke-linecap="round"/>
+        </svg>
+
         <div class="welcome-title">Добро пожаловать</div>
         <div class="welcome-sub">
           в админ панель <b>BENTO TEAM</b>
         </div>
+
       </div>
     </div>
   `;
 
+  setTimeout(menu, 1800);
+}
   setTimeout(menu, 1800);
 }
 
