@@ -127,9 +127,13 @@ function menu(){
       <div class="menu-title">👑 BENTO ADMIN</div>
 
       <div class="user-card">
-        <div class="name">${user.first_name}</div>
-        <div class="id">ID: ${user.id}</div>
-      </div>
+  <div class="name">${user.first_name}</div>
+
+  <div class="id" onclick="toggleID()">
+    <span id="user-id" class="hidden-value">•••••••••</span>
+    <span class="eye" id="eye-id">👁</span>
+  </div>
+</div>
 
       <div class="menu-list">
         <div class="menu-item">📩 Заявки</div>
@@ -257,6 +261,25 @@ async function delAdmin(id){
 
   await sb.from("admins").delete().eq("id", id);
   adminPanel();
+}
+
+let idHidden = true;
+
+function toggleID(){
+  const idEl = document.getElementById("user-id");
+  const eye = document.getElementById("eye-id");
+
+  if(!idEl) return;
+
+  idHidden = !idHidden;
+
+  if(idHidden){
+    idEl.textContent = "•••••••••";
+    eye.textContent = "👁";
+  }else{
+    idEl.textContent = "ID " + user.id;
+    eye.textContent = "🙈";
+  }
 }
 
 start();
