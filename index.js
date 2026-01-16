@@ -166,7 +166,7 @@ window.press = function(k){
   if(Date.now() < blockedUntil) return;
 
   if(k === "⌫") input = input.slice(0,-1);
-  else if(input.length < 4) input += k;
+  else if(input.length < 4) input += String(k);
 
   error = false;
   input.length === 4 ? check() : drawPin();
