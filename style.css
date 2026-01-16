@@ -269,3 +269,35 @@ body{
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+
+/* ===== FADE TRANSITIONS ===== */
+
+.fade-in {
+  animation: fadeIn .35s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut .35s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
