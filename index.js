@@ -228,12 +228,15 @@ app.addEventListener("click", e => {
 });
 
 window.press = function(k){
+  if(inputLocked) return;
   if(Date.now() < blockedUntil) return;
+
+  inputLocked = true;
 
   tg.HapticFeedback.impactOccurred("light");
 
   if(k === "⌫") {
-    input = input.slice(0,-1);
+    input = input.slice(0, -1);
   } else if(input.length < 4) {
     input += String(k);
   }
@@ -244,6 +247,10 @@ window.press = function(k){
   if(input.length === 4){
     check();
   }
+
+  requestAnimationFrame(() => {
+    inputLocked = false;
+  });
 };
 
   requestAnimationFrame(() => {
