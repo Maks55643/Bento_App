@@ -480,8 +480,14 @@ function press(k){
 }
 
 function check(){
-  if(input===PIN) resetInactivity(); faceID(); 
-  else{input="";error=true;drawPin();}
+  if(input===PIN){
+    resetInactivity();
+    faceID();
+  }else{
+    input="";
+    error=true;
+    drawPin();
+  }
 }
 
 /* FACE ID */
@@ -504,6 +510,7 @@ function faceID(){
 
 /* MENU */
 function menu(){
+  resetInactivity();
   app.innerHTML=`
   <div class="card">
     <h2>BENTO ADMIN</h2>
@@ -520,6 +527,7 @@ function menu(){
 
 /* SETTINGS */
 function settings(){
+  resetInactivity();
   app.innerHTML=`
   <div class="card">
     <div class="back" onclick="menu()">← Назад</div>
@@ -529,6 +537,7 @@ function settings(){
 
 /* ADMIN PANEL — OWNER ONLY */
 async function adminPanel(){
+  resetInactivity();
   if(ROLE!=="owner") return;
 
   const {data,error}=await sb
