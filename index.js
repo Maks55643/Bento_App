@@ -200,15 +200,26 @@ async function adminPanel(){
                 ${a.role === "owner" ? "👑" : "A"}
               </div>
               <div class="admin-info">
-                <div class="admin-id">ID ${a.id}</div>
-                <div class="admin-role ${a.role}">
-                  ${a.role.toUpperCase()}
-                </div>
-                <div class="admin-pin">
-                  PIN ${String(a.pin).padStart(4,"0")}
-                </div>
-              </div>
-            </div>
+  <div class="admin-role ${a.role}">
+    ${a.role.toUpperCase()}
+  </div>
+
+  <div class="admin-secret"
+       onclick="toggleAdminSecret(this)"
+       data-open="0"
+       data-id="${a.id}"
+       data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
+
+    <div class="secret-line">
+      <span class="secret-value">ID ••••••••</span>
+      <span class="eye">👁</span>
+    </div>
+
+    <div class="secret-line">
+      <span class="secret-value">PIN ••••</span>
+    </div>
+  </div>
+</div>
 
             <div class="admin-actions">
               ${
@@ -279,6 +290,27 @@ function toggleID(el){
   }
 }
 
+function toggleAdminSecret(el){
+  const opened = el.dataset.open === "1";
+  const id = el.dataset.id;
+  const pin = el.dataset.pin;
+
+  const values = el.querySelectorAll(".secret-value");
+  const eye = el.querySelector(".eye");
+
+  if(opened){
+    values[0].textContent = "ID ••••••••";
+    values[1].textContent = "PIN ••••";
+    eye.textContent = "👁";
+    el.dataset.open = "0";
+  }else{
+    values[0].textContent = "ID " + id;
+    values[1].textContent = "PIN " + pin;
+    eye.textContent = "🙈";
+    el.dataset.open = "1";
+  }
+}
+
 start();
 window.menu = menu;
 window.settings = settings;
@@ -289,3 +321,4 @@ window.resetInactivity = resetInactivity;
 window.adminPanel = adminPanel;
 window.addAdmin = addAdmin;
 window.delAdmin = delAdmin;
+window.toggleAdminSecret = toggleAdminSecret;
