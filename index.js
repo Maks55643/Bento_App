@@ -1,5 +1,6 @@
 const tg = Telegram.WebApp;
 tg.expand();
+tg.ready();
 
 const user = tg.initDataUnsafe.user;
 
@@ -41,12 +42,26 @@ function toggleTheme(){
 /* START */
 async function start(){
   resetInactivity();
-  const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
-  if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE = String(data.role || "")
-  .toLowerCase()
-  .trim();
-  PIN=String(data.pin).trim();
+
+  if(!user || !user.id){
+    app.innerHTML = "⛔ Откройте приложение через Telegram";
+    return;
+  }
+
+  const { data, error } = await sb
+    .from("admins")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if(error || !data){
+    app.innerHTML = "⛔ Нет доступа";
+    return;
+  }
+
+  ROLE = String(data.role || "").toLowerCase().trim();
+  PIN  = String(data.pin).trim();
+
   drawPin();
 }
 
