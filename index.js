@@ -156,25 +156,24 @@ if(state === "blocked"){
   localStorage.removeItem(getAttemptsKey(user.id));
   attempts = 0;
 
-  let data;
-  try{
-    const res = await sb
-      .from("admins")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-    data = res.data;
-  }catch(e){
-    loading.innerHTML = "⚠️ Ошибка подключения";
-    showApp();
-    return;
-  }
+  const { data, error } = await sb
+  .from("admins")
+  .select("*")
+  .eq("tg_id", user.id)
+  .maybeSingle();
 
-  if(!data){
-    loading.innerHTML = "⛔ Нет доступа";
-    showApp();
-    return;
-  }
+if(error){
+  console.error(error);
+  loading.innerHTML = "⚠️ Ошибка базы данных";
+  showApp();
+  return;
+}
+
+if(!data){
+  loading.innerHTML = "⛔ Нет доступа";
+  showApp();
+  return;
+}
 
   ROLE = data.role;
   PIN = String(data.pin).padStart(4, "0");
