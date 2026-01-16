@@ -19,6 +19,48 @@
   <div class="logo">B</div>
   <div class="title">BENTO TEAM</div>
 
+  <svg class="loader-svg" width="120" height="120"
+     viewBox="0 0 120 120" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="loader-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#9fa8ff"/>
+      <stop offset="100%" stop-color="#6affd6"/>
+    </linearGradient>
+
+    <filter id="loader-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- rotating ring -->
+  <circle cx="60" cy="60" r="42"
+          stroke="url(#loader-grad)"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-dasharray="80 40"
+          filter="url(#loader-glow)">
+    <animateTransform
+      attributeName="transform"
+      type="rotate"
+      from="0 60 60"
+      to="360 60 60"
+      dur="1.1s"
+      repeatCount="indefinite"/>
+  </circle>
+
+  <!-- inner dot -->
+  <circle cx="60" cy="60" r="6"
+          fill="#6affd6"
+          filter="url(#loader-glow)"/>
+</svg>
+
   <svg class="loader" viewBox="0 0 50 50">
     <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
   </svg>
