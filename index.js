@@ -278,24 +278,6 @@ async function check(){
   drawPin();
 }
 
-  tg.HapticFeedback.notificationOccurred("error");
-  attempts++;
-  input = "";
-  error = true;
-  inputLocked = false;
-
-  localStorage.setItem(getAttemptsKey(user.id), attempts);
-
-  if(attempts >= MAX_ATTEMPTS){
-    blockedUntil = Date.now() + BLOCK_TIME;
-    localStorage.setItem(getBlockKey(user.id), blockedUntil);
-    showBlockedScreen();
-    return;
-  }
-
-  drawPin();
-}
-
 /* ===== BLOCKED ===== */
 function showBlockedScreen(){
   app.innerHTML = `
