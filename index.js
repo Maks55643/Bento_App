@@ -157,6 +157,99 @@ function settings(){
   `;
 }
 
+async function adminPanel(){
+  resetInactivity();
+
+  if(ROLE !== "owner"){
+    alert("Нет доступа");
+    return;
+  }
+
+  const { data, error } = await sb
+    .from("admins")
+    .select("*")
+    .order("role", { ascending: false });
+
+  if(error){
+    alert("Ошибка загрузки админов");
+    return;
+  }
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="back" onclick="menu()">← Назад</div>
+      <h3>Админы</h3>
+
+      <div class="admin-list">
+        ${data.map(a => `
+          <div class="admin-card ${a.role === "owner" ? "owner" : "admin"}">
+            <div class="admin-left">
+              <div class="admin-avatar ${a.role === "owner" ? "premium-ring" : ""}">
+                ${a.role === "owner" ? "👑" : "A"}
+              </div>
+              <div class="admin-info">
+                <div class="admin-id">ID ${a.id}</div>
+                <div class="admin-role ${a.role}">
+                  ${a.role.toUpperCase()}
+                </div>
+                <div class="admin-pin">
+                  PIN ${String(a.pin).padStart(4,"0")}
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              ${
+                a.role === "owner"
+                ? `<span style="font-size:12px;color:var(--muted)">protected</span>`
+                : `<button class="del-btn" onclick="delAdmin(${a.id})">❌</button>`
+              }
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="big-btn" onclick="addAdmin()">➕ Добавить админа</button>
+    </div>
+  `;
+}
+
+async function addAdmin(){
+  if(ROLE !== "owner") return;
+
+  const id = prompt("Telegram ID");
+  const pin = prompt("PIN (4 цифры)");
+  const role = prompt("admin / owner");
+
+  if(!id || !pin || !role) return;
+
+  await sb.from("admins").insert({
+    id: Number(id),
+    pin: String(pin),
+    role: role.toLowerCase().trim()
+  });
+
+  adminPanel();
+}
+
+async function delAdmin(id){
+  if(ROLE !== "owner") return;
+
+  const { data } = await sb
+    .from("admins")
+    .select("role")
+    .eq("id", id)
+    .single();
+
+  if(data?.role === "owner"){
+    alert("❌ Нельзя удалить owner");
+    return;
+  }
+
+  await sb.from("admins").delete().eq("id", id);
+  adminPanel();
+}
+
 start();
 window.menu = menu;
 window.settings = settings;
