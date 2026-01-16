@@ -122,23 +122,22 @@ function faceID(){
 function menu(){
   resetInactivity();
 
-  let html = `
+  app.innerHTML = `
     <div class="card">
       <h2>BENTO ADMIN</h2>
-      <p>${user.first_name} • ${ROLE}</p>
-  `;
+      <p style="color:var(--muted);margin-bottom:18px">
+        ${user.first_name} • ${ROLE.toUpperCase()}
+      </p>
 
-  if(ROLE === "owner"){
-    html += `<button class="big-btn" onclick="adminPanel()">🛡 Админы</button>`;
-  }
+      ${ROLE === "owner"
+        ? `<button class="big-btn" onclick="adminPanel()">🛡 Админы</button>`
+        : ``
+      }
 
-  html += `
       <button class="big-btn" onclick="settings()">⚙️ Настройки</button>
       <button class="big-btn danger" onclick="tg.close()">🚪 Выйти</button>
     </div>
   `;
-
-  app.innerHTML = html;
 }
 
 function settings(){
