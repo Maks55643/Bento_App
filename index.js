@@ -8,8 +8,13 @@ const loading = document.getElementById("loading");
 const app = document.getElementById("app");
 
 function showApp() {
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  loading.style.opacity = "0";
+  loading.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    app.style.display = "flex";
+  }, 300);
 }
 
 /* SUPABASE */
@@ -75,9 +80,9 @@ async function start(){
   PIN=String(data.pin);
 
   setTimeout(()=>{
-    showApp();
-    drawPin();
-  },1200);
+  drawPin();   // ← СНАЧАЛА рисуем PIN
+  showApp();   // ← ПОТОМ убираем loader
+},1200);
 }
 
 /* PIN */
