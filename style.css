@@ -118,7 +118,7 @@ body{
 
 /* --- PREMIUM RING --- */
 
-.premium-ring{position:relative}
+/*.premium-ring{position:relative}
 
 .premium-ring::before{
   content:"";
@@ -128,6 +128,89 @@ body{
   background:conic-gradient(#ffcc55,#ffd966,#ffb700,#ffd966,#ffcc55);
   animation:premiumRotate 3.5s linear infinite;
   z-index:-1;
+} */
+
+.admin-card.owner{
+  position: relative;
+  border: 1px solid rgba(255,215,0,.35);
+  box-shadow:
+    0 0 18px rgba(255,215,0,.35),
+    inset 0 0 12px rgba(255,215,0,.15);
+}
+
+.admin-card.owner .admin-avatar{
+  box-shadow:
+    0 0 0 2px rgba(255,215,0,.6),
+    0 0 18px rgba(255,215,0,.6);
+}
+
+.admin-list{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:16px;
+}
+
+.admin-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  backdrop-filter:blur(14px);
+}
+
+.admin-left{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+
+.admin-avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#5f63ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:700;
+  color:white;
+}
+
+.admin-info{
+  text-align:left;
+}
+
+.admin-id{
+  font-size:14px;
+  font-weight:600;
+}
+
+.admin-role{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.admin-pin{
+  font-size:12px;
+  color:#c7c9ff;
+  letter-spacing:2px;
+  margin-top:4px;
+}
+
+.del-btn{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  border:none;
+  background:#2a1d1d;
+  color:var(--danger);
+  font-size:16px;
+  cursor:pointer;
 }
 
 @keyframes premiumRotate{
