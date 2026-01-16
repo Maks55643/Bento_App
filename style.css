@@ -242,3 +242,25 @@ body{
   font-weight: 700;
   letter-spacing: 2px;
 }
+
+/* === iOS FIX: enable clicks inside backdrop-filter === */
+
+#app{
+  pointer-events: auto;
+}
+
+.card{
+  position: relative;
+  z-index: 1;
+}
+
+.keypad{
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.key{
+  pointer-events: auto;
+  touch-action: manipulation;
+}
