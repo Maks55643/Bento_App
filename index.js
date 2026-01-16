@@ -229,22 +229,6 @@ async function adminPanel(){
   `;
 }
 
-            <div class="admin-actions">
-              ${
-                a.role === "owner"
-                ? `<span style="font-size:12px;color:var(--muted)">protected</span>`
-                : `<button class="del-btn" onclick="delAdmin(${a.id})">❌</button>`
-              }
-            </div>
-          </div>
-        `).join("")}
-      </div>
-
-      <button class="big-btn" onclick="addAdmin()">➕ Добавить админа</button>
-    </div>
-  `;
-}
-
 async function addAdmin(){
   if(ROLE !== "owner") return;
 
