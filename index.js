@@ -14,7 +14,6 @@ const getAttemptsKey = id => `bento_attempts_${id}`;
 function showApp() {
   loading.style.opacity = "0";
   loading.style.pointerEvents = "none";
-
   app.style.pointerEvents = "auto";
 
   setTimeout(() => {
@@ -82,7 +81,6 @@ async function start(){
 
   user = tg.initDataUnsafe.user;
 
-  // ♻️ восстановление блокировки
   blockedUntil = Number(localStorage.getItem(getBlockKey(user.id)) || 0);
   attempts = Number(localStorage.getItem(getAttemptsKey(user.id)) || 0);
 
@@ -94,25 +92,23 @@ async function start(){
     return;
   }
 
-  // очистка если блок истёк
   localStorage.removeItem(getBlockKey(user.id));
   localStorage.removeItem(getAttemptsKey(user.id));
   attempts = 0;
 
   let data;
-try{
-  const res = await sb
-    .from("admins")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  data = res.data;
-}catch(e){
-  loading.innerHTML = "⚠️ Ошибка подключения";
-  showApp(); // 🔥 ОБЯЗАТЕЛЬНО
-  return;
-}
+  try{
+    const res = await sb
+      .from("admins")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    data = res.data;
+  }catch(e){
+    loading.innerHTML = "⚠️ Ошибка подключения";
+    showApp();
+    return;
+  }
 
   if(!data){
     loading.innerHTML = "⛔ Нет доступа";
@@ -124,19 +120,15 @@ try{
   PIN = String(data.pin).padStart(4, "0");
 
   setTimeout(()=>{
-  showApp(); // сначала УБИРАЕМ loader
+    showApp();
+    setTimeout(drawPin, 350);
+  }, 1200);
 
   setTimeout(()=>{
-    drawPin(); // рисуем PIN ПОСЛЕ скрытия loader
-  }, 350);
-}, 1200);
-
-  // страховка от вечной загрузки
-setTimeout(()=>{
-  if(loading.style.display !== "none"){
-    showApp();
-  }
-}, 3000);
+    if(loading.style.display !== "none"){
+      showApp();
+    }
+  }, 3000);
 }
 
 /* ===== PIN ===== */
@@ -156,39 +148,44 @@ function drawPin(){
       </div>
 
       <div class="keypad">
-  ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>{
-    if(k === "") return `<div class="key empty"></div>`;
-    return `
-      <div class="key" onclick="press('${k}')">
-        ${k}
-      </div>`;
-  }).join("")}
-</div>
+        ${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>{
+          if(k === "") return `<div class="key empty"></div>`;
+          return `<div class="key" data-key="${k}">${k}</div>`;
+        }).join("")}
+      </div>
     </div>
   `;
 }
 
+/* ===== SAFE KEYPAD HANDLER (FIX 0 BUG) ===== */
+app.addEventListener("click", e => {
+  const key = e.target.closest(".key");
+  if(!key || key.classList.contains("empty")) return;
+
+  const value = key.dataset.key;
+  if(value === undefined) return;
+
+  press(value);
+});
+
 window.press = function(k){
   if(inputLocked) return;
+  if(Date.now() < blockedUntil) return;
 
   tg.HapticFeedback.impactOccurred("light");
 
-  if(Date.now() < blockedUntil) return;
-
-  if(k === "⌫") {
+  if(k === "⌫"){
     input = input.slice(0,-1);
-  } else if(input.length < 4) {
+  }else if(input.length < 4){
     input += String(k);
   }
 
   error = false;
 
   if(input.length === 4){
-    setTimeout(() => {
-      inputLocked = true;
-      check();
-    }, 0);
-  } else {
+    inputLocked = true;
+    check();
+  }else{
     drawPin();
   }
 };
@@ -248,10 +245,8 @@ function updateBlockTimer(){
     attempts = 0;
     blockedUntil = 0;
     error = false;
-
     localStorage.removeItem(getBlockKey(user.id));
     localStorage.removeItem(getAttemptsKey(user.id));
-
     drawPin();
     return;
   }
@@ -263,7 +258,5 @@ function updateBlockTimer(){
   setTimeout(updateBlockTimer, 1000);
 }
 
-/* ===== WELCOME / MENU / SETTINGS / ADMINS ===== */
-/* — ОСТАВЛЕНО БЕЗ ИЗМЕНЕНИЙ — */
-
+/* ===== START ===== */
 start();
