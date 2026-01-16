@@ -129,10 +129,9 @@ function menu(){
       <div class="user-card">
   <div class="name">${user.first_name}</div>
 
-  <div class="id" onclick="toggleID()">
-    <span id="user-id" class="hidden-value">•••••••••</span>
-    <span class="eye" id="eye-id">👁</span>
-  </div>
+  <div class="id" onclick="toggleID(this)" data-open="0">
+  <span class="hidden-value">•••••••••</span>
+  <span class="eye">👁</span>
 </div>
 
       <div class="menu-list">
@@ -263,22 +262,20 @@ async function delAdmin(id){
   adminPanel();
 }
 
-let idHidden = true;
+function toggleID(el){
+  const value = el.querySelector(".hidden-value");
+  const eye = el.querySelector(".eye");
 
-function toggleID(){
-  const idEl = document.getElementById("user-id");
-  const eye = document.getElementById("eye-id");
+  const opened = el.dataset.open === "1";
 
-  if(!idEl) return;
-
-  idHidden = !idHidden;
-
-  if(idHidden){
-    idEl.textContent = "•••••••••";
+  if(opened){
+    value.textContent = "•••••••••";
     eye.textContent = "👁";
+    el.dataset.open = "0";
   }else{
-    idEl.textContent = "ID " + user.id;
+    value.textContent = "ID " + user.id;
     eye.textContent = "🙈";
+    el.dataset.open = "1";
   }
 }
 
@@ -286,6 +283,7 @@ start();
 window.menu = menu;
 window.settings = settings;
 window.faceID = faceID;
+window.toggleID = toggleID;
 window.toggleTheme = toggleTheme;
 window.resetInactivity = resetInactivity;
 window.adminPanel = adminPanel;
