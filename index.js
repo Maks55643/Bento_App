@@ -169,7 +169,8 @@ function drawPin(){
 }
 
 window.press = function(k){
-  if(inputLocked) return; // 🔒 ЗАЩИТА
+  if(inputLocked) return;
+
   tg.HapticFeedback.impactOccurred("light");
 
   if(Date.now() < blockedUntil) return;
@@ -183,13 +184,14 @@ window.press = function(k){
   error = false;
 
   if(input.length === 4){
-  setTimeout(() => {
-    inputLocked = true;
-    check();
-  }, 0);
-} else {
-  drawPin();
-}
+    setTimeout(() => {
+      inputLocked = true;
+      check();
+    }, 0);
+  } else {
+    drawPin();
+  }
+};
 
 function check(){
   if(input === PIN){
