@@ -192,13 +192,35 @@ async function adminPanel(){
       <div class="back" onclick="menu()">← Назад</div>
       <h3>Админы</h3>
 
-      <div class="admin-list">
-        ${data.map(a => `
-          <div class="admin-card ${a.role === "owner" ? "owner" : "admin"}">
-            <div class="admin-left">
-              <div class="admin-avatar ${a.role === "owner" ? "premium-ring" : ""}">
-                ${a.role === "owner" ? "👑" : "A"}
-              </div>
+      <div class="admin-list clean">
+  ${data.map(a => `
+    <div class="admin-row">
+      <div class="admin-main">
+        <div class="admin-id">
+          <b>ID</b>
+          <span class="secret"
+                onclick="toggleAdminSecret(this)"
+                data-open="0"
+                data-id="${a.id}"
+                data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
+            ••••••••
+            <span class="eye">👁</span>
+          </span>
+        </div>
+
+        <div class="admin-role-label">${a.role.toUpperCase()}</div>
+      </div>
+
+      <div class="admin-actions">
+        ${
+          a.role === "owner"
+          ? `<span class="protected">protected</span>`
+          : `<button class="del-btn" onclick="delAdmin(${a.id})">❌</button>`
+        }
+      </div>
+    </div>
+  `).join("")}
+</div>
               <div class="admin-info">
   <div class="admin-role ${a.role}">
     ${a.role.toUpperCase()}
@@ -288,30 +310,22 @@ function toggleID(el){
   }
 }
 
-function toggleAdminSecret(e, eyeEl){
-  e.stopPropagation(); // 🔥 ВАЖНО
-
-  const box = eyeEl.closest(".admin-secret");
-  const opened = box.dataset.open === "1";
-
-  const id = box.dataset.id;
-  const pin = box.dataset.pin;
-
-  const values = box.querySelectorAll(".secret-value");
+function toggleAdminSecret(el){
+  const opened = el.dataset.open === "1";
+  const id = el.dataset.id;
+  const pin = el.dataset.pin;
+  const eye = el.querySelector(".eye");
 
   if(opened){
-    values[0].textContent = "ID ••••••••";
-    values[1].textContent = "PIN ••••";
-    eyeEl.textContent = "👁";
-    box.dataset.open = "0";
+    el.childNodes[0].textContent = "•••••••• ";
+    eye.textContent = "👁";
+    el.dataset.open = "0";
   }else{
-    values[0].textContent = "ID " + id;
-    values[1].textContent = "PIN " + pin;
-    eyeEl.textContent = "🙈";
-    box.dataset.open = "1";
+    el.childNodes[0].textContent = `ID ${id} | PIN ${pin} `;
+    eye.textContent = "🙈";
+    el.dataset.open = "1";
   }
 }
-
 start();
 window.menu = menu;
 window.settings = settings;
