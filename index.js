@@ -15,6 +15,8 @@ function showApp() {
   loading.style.opacity = "0";
   loading.style.pointerEvents = "none";
 
+  app.style.pointerEvents = "auto";
+
   setTimeout(() => {
     loading.style.display = "none";
     app.style.display = "flex";
