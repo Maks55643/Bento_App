@@ -255,7 +255,7 @@ window.press = function(k){
 };
 
 async function check(){
-  if(input === PIN){
+  if(Number(input) === Number(PIN)){
     tg.HapticFeedback.notificationOccurred("success");
     input = "";
     await clearPinErrors();
