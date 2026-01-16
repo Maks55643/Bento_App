@@ -162,11 +162,18 @@ function drawPin(){
 }
 
 window.press = function(k){
+  if (pressLocked) return;          // ⛔ защита
+  pressLocked = true;
+  setTimeout(()=>pressLocked=false, 120); // 🔓 разблокировка
+
   tg.HapticFeedback.impactOccurred("light");
   if(Date.now() < blockedUntil) return;
 
-  if(k === "⌫") input = input.slice(0,-1);
-  else if(input.length < 4) input += String(k);
+  if(k === "⌫") {
+    input = input.slice(0,-1);
+  } else if(input.length < 4) {
+    input += String(k);
+  }
 
   error = false;
   input.length === 4 ? check() : drawPin();
