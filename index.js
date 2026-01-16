@@ -413,7 +413,7 @@ let adminsCache = [];
 async function loadAdmins(){
   const { data, error } = await sb
     .from("admins")
-    .select("id, role")
+    .select("tg_id, role")
     .order("role", { ascending: false });
 
   if(error){
