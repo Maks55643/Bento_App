@@ -28,6 +28,7 @@ let user=null, ROLE="", PIN="", input="", error=false;
 let attempts=0, blockedUntil=0;
 const MAX_ATTEMPTS=3;
 const BLOCK_TIME=5*60*1000;
+const STORAGE_BLOCK_KEY = "bento_blocked_until";
 
 /* AUTO LOGOUT */
 const INACTIVITY=60*1000;
@@ -64,6 +65,20 @@ async function start(){
   }
 
   user=tg.initDataUnsafe.user;
+
+  // 🔒 проверка сохранённой блокировки
+const savedBlock = localStorage.getItem(STORAGE_BLOCK_KEY);
+
+if(savedBlock && Date.now() < Number(savedBlock)){
+  blockedUntil = Number(savedBlock);
+
+  setTimeout(()=>{
+    showApp();
+    showBlockedScreen();
+  }, 800);
+
+  return;
+}
 
   const {data}=await sb
     .from("admins")
@@ -134,10 +149,14 @@ function check(){
   error = true;
 
   if(attempts >= MAX_ATTEMPTS){
-    blockedUntil = Date.now() + BLOCK_TIME;
-    showBlockedScreen();
-    return;
-  }
+  blockedUntil = Date.now() + BLOCK_TIME;
+
+  // 💾 сохраняем блокировку
+  localStorage.setItem(STORAGE_BLOCK_KEY, blockedUntil);
+
+  showBlockedScreen();
+  return;
+}
 
   drawPin();
 }
@@ -165,12 +184,16 @@ function updateBlockTimer(){
   const left = blockedUntil - Date.now();
 
   if(left <= 0){
-    attempts = 0;
-    blockedUntil = 0;
-    error = false;
-    drawPin();
-    return;
-  }
+  attempts = 0;
+  blockedUntil = 0;
+  error = false;
+
+  // 🧹 очистка storage
+  localStorage.removeItem(STORAGE_BLOCK_KEY);
+
+  drawPin();
+  return;
+}
 
   const m = String(Math.floor(left / 60000)).padStart(2,"0");
   const s = String(Math.floor((left % 60000) / 1000)).padStart(2,"0");
