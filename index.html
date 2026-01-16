@@ -1,32 +1,34 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BENTO Admin</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>BENTO ADMIN</title>
 
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
-  
-  <!-- LOADER -->
-  <div id="loading" class="screen active">
-    <div class="logo">B</div>
-    <div class="title">BENTO TEAM</div>
 
-    <svg class="loader" viewBox="0 0 50 50">
-      <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-    </svg>
+  <!-- LOADER -->
+  <div id="loading" class="loader-screen">
+    <div class="loader-card">
+      <div class="loader-logo">B</div>
+      <div class="loader-text">LOADING</div>
+
+      <svg class="loader" viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="20"
+                fill="none"
+                stroke-width="4"/>
+      </svg>
+    </div>
   </div>
 
   <!-- APP -->
   <div id="app"></div>
 
-  <script src="./index.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
