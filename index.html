@@ -18,7 +18,6 @@
 <div id="loading" class="screen active">
   <div class="loader-wrap">
 
-    <!-- SVG LOADER -->
     <svg class="ios-loader" width="120" height="120"
          viewBox="0 0 120 120" fill="none"
          xmlns="http://www.w3.org/2000/svg">
@@ -39,17 +38,22 @@
         </filter>
       </defs>
 
-      <!-- outer ring -->
       <circle cx="60" cy="60" r="44"
               stroke="url(#grad-loader)"
               stroke-width="4"
               stroke-linecap="round"
               opacity="0.85"
               filter="url(#softGlow)"
-              stroke-dasharray="180"
-              stroke-dashoffset="0"/>
+              stroke-dasharray="180">
+        <animateTransform
+          attributeName="transform"
+          type="rotate"
+          from="0 60 60"
+          to="360 60 60"
+          dur="1.2s"
+          repeatCount="indefinite"/>
+      </circle>
 
-      <!-- center dot -->
       <circle cx="60" cy="60" r="5"
               fill="#7dffe0"
               filter="url(#softGlow)"/>
@@ -57,35 +61,7 @@
     </svg>
 
     <div class="loader-text">BENTO TEAM</div>
-
   </div>
-</div>
-
-  <!-- rotating ring -->
-  <circle cx="60" cy="60" r="42"
-          stroke="url(#loader-grad)"
-          stroke-width="4"
-          stroke-linecap="round"
-          stroke-dasharray="80 40"
-          filter="url(#loader-glow)">
-    <animateTransform
-      attributeName="transform"
-      type="rotate"
-      from="0 60 60"
-      to="360 60 60"
-      dur="1.1s"
-      repeatCount="indefinite"/>
-  </circle>
-
-  <!-- inner dot -->
-  <circle cx="60" cy="60" r="6"
-          fill="#6affd6"
-          filter="url(#loader-glow)"/>
-</svg>
-
-  <svg class="loader" viewBox="0 0 50 50">
-    <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-  </svg>
 </div>
 
 <!-- APP -->
