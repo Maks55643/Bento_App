@@ -192,7 +192,10 @@ function welcome(){
     </div>
   `;
 
-  setTimeout(menu, 1800);
+  setTimeout(()=>{
+    document.getElementById("welcome")?.remove(); // 🔥 ВАЖНО
+    menu();
+  },1800);
 }
 
 /* MENU */
