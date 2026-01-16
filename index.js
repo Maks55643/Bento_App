@@ -195,6 +195,7 @@ function check(){
     tg.HapticFeedback.notificationOccurred("success");
     attempts = 0;
     input = "";
+    inputLocked = false;
     localStorage.removeItem(getAttemptsKey(user.id));
     welcome();
     return;
@@ -204,6 +205,7 @@ function check(){
   attempts++;
   input = "";
   error = true;
+  inputLocked = false;
 
   localStorage.setItem(getAttemptsKey(user.id), attempts);
 
