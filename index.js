@@ -86,7 +86,7 @@ window.press=function(k){
 function check(){
   if(input === PIN){
     attempts = 0;
-    loading();
+    welcome();
   }else{
     attempts++;
     input="";
@@ -97,14 +97,20 @@ function check(){
   }
 }
 
-function loading(){
+function welcome(){
   app.innerHTML = `
-    <div class="card loading-screen">
-      <img src="loader.png" class="loader-img" alt="loading">
-      <div class="loading-text">Загрузка...</div>
+    <div class="welcome-screen">
+      <div class="welcome-card">
+        <img src="bento.png" class="welcome-logo" alt="BENTO">
+        <div class="welcome-title">Добро пожаловать</div>
+        <div class="welcome-sub">
+          в админ панель <b>BENTO TEAM</b>
+        </div>
+      </div>
     </div>
   `;
-  setTimeout(menu, 1200);
+
+  setTimeout(menu, 1800);
 }
 
 function menu(){
