@@ -411,9 +411,25 @@ const sb = supabase.createClient(
 let ROLE="", PIN="", input="", error=false;
 const app=document.getElementById("app");
 
+  /* ===== AUTO LOGOUT ===== */
+const INACTIVITY_TIME = 60 * 1000; // 1 минута (можно 2, 5 и т.д.)
+let inactivityTimer = null;
+
+  ["click","touchstart","keydown"].forEach(evt=>{
+  document.addEventListener(evt, resetInactivity, {passive:true});
+});
+
 /* THEME */
 if(localStorage.getItem("theme")==="light")
   document.body.classList.add("light");
+
+  function resetInactivity(){
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+
+  inactivityTimer = setTimeout(()=>{
+    tg.close(); // закрываем WebApp
+  }, INACTIVITY_TIME);
+}
 
 function toggleTheme(){
   document.body.classList.toggle("light");
@@ -423,6 +439,7 @@ function toggleTheme(){
 
 /* START */
 async function start(){
+  resetInactivity();
   const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
   ROLE=String(data.role).toLowerCase();
@@ -463,7 +480,7 @@ function press(k){
 }
 
 function check(){
-  if(input===PIN) faceID();
+  if(input===PIN) resetInactivity(); faceID(); 
   else{input="";error=true;drawPin();}
 }
 
