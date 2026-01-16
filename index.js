@@ -34,6 +34,7 @@ let user = null;
 let ROLE = "";
 let PIN = "";
 let input = "";
+let inputLocked = false;
 let error = false;
 
 let attempts = 0;
@@ -168,6 +169,7 @@ function drawPin(){
 }
 
 window.press = function(k){
+  if(inputLocked) return; // 🔒 ЗАЩИТА
   tg.HapticFeedback.impactOccurred("light");
 
   if(Date.now() < blockedUntil) return;
@@ -181,6 +183,7 @@ window.press = function(k){
   error = false;
 
   if(input.length === 4){
+    inputLocked = true;   // 🔒 ЛОЧИМ
     check();
   } else {
     drawPin();
