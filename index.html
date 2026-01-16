@@ -149,7 +149,7 @@ function toggleTheme(){
 async function start(){
   const {data}=await sb.from("admins").select("*").eq("id",user.id).single();
   if(!data) return app.innerHTML="⛔ Нет доступа";
-  ROLE=data.role;
+  ROLE=String(data.role).toLowerCase();
   PIN=String(data.pin).trim();
   drawPin();
 }
