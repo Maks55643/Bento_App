@@ -1,6 +1,9 @@
 const tg = Telegram.WebApp;
+
 tg.expand();
 tg.ready();
+tg.setHeaderColor("#0e0f14");
+tg.setBackgroundColor("#0e0f14");
 
 const user = tg.initDataUnsafe.user;
 
@@ -90,6 +93,8 @@ function drawPin(){
 }
 
 window.press=function(k){
+  tg.HapticFeedback.impactOccurred("light");
+  
   if(Date.now() < blockedUntil) return;
   if(k==="⌫") input=input.slice(0,-1);
   else if(input.length<4) input+=k;
@@ -100,9 +105,11 @@ window.press=function(k){
 
 function check(){
   if(input === PIN){
+    tg.HapticFeedback.notificationOccurred("success");
     attempts = 0;
     welcome();
   }else{
+    tg.HapticFeedback.notificationOccurred("error");
     attempts++;
     input="";
     error=true;
@@ -149,6 +156,7 @@ function welcome(){
 }
   
 function menu(){
+  tg.HapticFeedback.impactOccurred("medium");
   resetInactivity();
 
   app.innerHTML = `
