@@ -323,5 +323,44 @@ function welcome(){
   setTimeout(menu, 1800);
 }
 
+/* MENU */
+function menu(){
+  resetInactivity();
+  app.innerHTML=`
+    <div class="card">
+      <div class="menu-title">👑 BENTO ADMIN</div>
+
+      <div class="menu-item" onclick="settings()">⚙️ Настройки</div>
+
+      ${ROLE==="owner"
+        ? <div class="menu-item" onclick="adminPanel()">👥 Админы</div>
+        : ``}
+
+      <div class="menu-item exit" onclick="tg.close()">🚪 Выйти</div>
+    </div>`;
+}
+
+/* SETTINGS */
+function settings(){
+  app.innerHTML=`
+    <div class="card">
+      <div class="menu-item" onclick="toggleTheme()">🌗 Сменить тему</div>
+      <div class="menu-item" onclick="menu()">← Назад</div>
+    </div>`;
+}
+
+/* ADMINS */
+async function adminPanel(){
+  const {data}=await sb.from("admins").select("*");
+  app.innerHTML=`
+    <div class="card">
+      <div class="menu-item" onclick="menu()">← Назад</div>
+      ${data.map(a=>`
+        <div class="menu-item">
+          ${a.id} | ${a.role}
+        </div>`).join("")}
+    </div>`;
+}
+
 /* ===== START ===== */
 start();
