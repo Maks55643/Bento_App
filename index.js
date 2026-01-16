@@ -119,19 +119,64 @@ window.press=function(k){
 }
 
 function check(){
-  if(input===PIN){
+  if(input === PIN){
     tg.HapticFeedback.notificationOccurred("success");
-    attempts=0;
+    attempts = 0;
+    input = "";
     welcome();
-  }else{
-    tg.HapticFeedback.notificationOccurred("error");
-    attempts++;
-    input="";
-    error=true;
-    if(attempts>=MAX_ATTEMPTS)
-      blockedUntil=Date.now()+BLOCK_TIME;
-    drawPin();
+    return;
   }
+
+  // ❌ неверный PIN
+  tg.HapticFeedback.notificationOccurred("error");
+  attempts++;
+  input = "";
+  error = true;
+
+  if(attempts >= MAX_ATTEMPTS){
+    blockedUntil = Date.now() + BLOCK_TIME;
+    showBlockedScreen();
+    return;
+  }
+
+  drawPin();
+}
+
+function showBlockedScreen(){
+  app.innerHTML = `
+    <div class="blocked-screen">
+      <div class="blocked-card">
+        <div class="lock-icon">🔒</div>
+        <div class="blocked-title">Слишком много попыток</div>
+        <div class="blocked-sub">Попробуйте позже</div>
+        <div class="blocked-timer" id="blockTimer">05:00</div>
+      </div>
+    </div>
+  `;
+
+  tg.HapticFeedback.impactOccurred("heavy");
+  updateBlockTimer();
+}
+
+function updateBlockTimer(){
+  const el = document.getElementById("blockTimer");
+  if(!el) return;
+
+  const left = blockedUntil - Date.now();
+
+  if(left <= 0){
+    attempts = 0;
+    blockedUntil = 0;
+    error = false;
+    drawPin();
+    return;
+  }
+
+  const m = String(Math.floor(left / 60000)).padStart(2,"0");
+  const s = String(Math.floor((left % 60000) / 1000)).padStart(2,"0");
+  el.textContent = `${m}:${s}`;
+
+  setTimeout(updateBlockTimer, 1000);
 }
 
 /* WELCOME */
