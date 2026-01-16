@@ -86,7 +86,7 @@ window.press=function(k){
 function check(){
   if(input === PIN){
     attempts = 0;
-    faceID();
+    loading();
   }else{
     attempts++;
     input="";
@@ -97,26 +97,14 @@ function check(){
   }
 }
 
-function faceID(){
+function loading(){
   app.innerHTML = `
-  <div class="card">
-    <h3>Face ID</h3>
-
-    <div class="faceid">
-      <svg class="face-icon" viewBox="0 0 24 24">
-        <path d="M4 7V5a2 2 0 0 1 2-2h2"/>
-        <path d="M20 7V5a2 2 0 0 0-2-2h-2"/>
-        <path d="M4 17v2a2 2 0 0 0 2 2h2"/>
-        <path d="M20 17v2a2 2 0 0 1-2 2h-2"/>
-        <circle cx="9" cy="10" r="1"/>
-        <circle cx="15" cy="10" r="1"/>
-        <path d="M9 15c.8.7 1.7 1 3 1s2.2-.3 3-1"/>
-      </svg>
-
-      <div class="scan-line"></div>
+    <div class="card loading-screen">
+      <img src="loader.png" class="loader-img" alt="loading">
+      <div class="loading-text">Загрузка...</div>
     </div>
-  </div>`;
-  setTimeout(menu, 1800);
+  `;
+  setTimeout(menu, 1200);
 }
 
 function menu(){
@@ -303,7 +291,7 @@ function toggleAdminSecret(el){
 start();
 window.menu = menu;
 window.settings = settings;
-window.faceID = faceID;
+window.loading = loading;
 window.toggleID = toggleID;
 window.toggleTheme = toggleTheme;
 window.resetInactivity = resetInactivity;
