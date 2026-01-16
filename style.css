@@ -195,6 +195,7 @@ body{
 .blocked-screen{
   position: fixed;
   inset: 0;
+  z-index: 9999; /* 🔥 ВАЖНО */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -211,6 +212,12 @@ body{
   text-align: center;
   max-width: 320px;
   width: 100%;
+  animation: blockPop .35s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes blockPop{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
 }
 
 .lock-icon{
