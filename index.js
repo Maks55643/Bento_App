@@ -132,9 +132,7 @@ function welcome(){
 
   setTimeout(menu, 1800);
 }
-  setTimeout(menu, 1800);
-}
-
+  
 function menu(){
   resetInactivity();
 
