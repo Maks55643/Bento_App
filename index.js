@@ -319,7 +319,6 @@ function toggleAdminSecret(el){
 start();
 window.menu = menu;
 window.settings = settings;
-window.loading = loading;
 window.toggleID = toggleID;
 window.toggleTheme = toggleTheme;
 window.resetInactivity = resetInactivity;
