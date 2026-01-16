@@ -37,9 +37,9 @@ async function getPinState(){
     .eq("tg_id", user.id)
     .maybeSingle();
 
-  if(bl && Date.now() < bl.blocked_until){
-    blockedUntil = bl.blocked_until;
-    return "blocked";
+  if(bl){
+    blockedUntil = Number(bl.blocked_until || 0); // FIX
+    if(Date.now() < blockedUntil) return "blocked";
   }
 
   const { data: pe } = await sb
@@ -48,7 +48,7 @@ async function getPinState(){
     .eq("tg_id", user.id)
     .maybeSingle();
 
-  attempts = pe?.attempts || 0;
+  attempts = Number(pe?.attempts || 0);
   return "ok";
 }
 
@@ -180,7 +180,7 @@ if(!data){
 }
 
   ROLE = data.role;
-  PIN = String(data.pin ?? "").trim().padStart(4, "0");
+  PIN = String(data.pin ?? "").padStart(4,"0");
 
   setTimeout(()=>{
     showApp();
@@ -496,7 +496,7 @@ async function addAdmin(){
 
   const { error } = await sb
     .from("admins")
-    .insert({ tg_id: Number(id), role, pin: 2580 })
+    .insert({ tg_id: Number(id), role, pin:"2580" })
 
   if(error){
     tg.HapticFeedback.notificationOccurred("error");
