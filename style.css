@@ -94,26 +94,30 @@ body{
 
 .back{text-align:left;color:var(--accent);cursor:pointer;margin-bottom:14px}
 
-/* --- FACE ID --- */
-
-.faceid{
-  width:130px;height:130px;border-radius:34px;
-  border:2px solid var(--accent);
-  margin:26px auto;position:relative;overflow:hidden;
-  box-shadow:var(--accent-glow);
-  display:flex;align-items:center;justify-content:center;
+.loading-screen{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
 }
 
-.scan-line{
-  position:absolute;left:0;right:0;height:6px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  animation:scan 1.2s infinite;
+.loader-img{
+  width:96px;
+  height:96px;
+  animation: pulse 1.2s infinite ease-in-out;
 }
 
-@keyframes scan{
-  0%{top:-6px}
-  50%{top:130px}
-  100%{top:-6px}
+.loading-text{
+  font-size:14px;
+  color:var(--muted);
+  letter-spacing:1px;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);opacity:.6}
+  50%{transform:scale(1.05);opacity:1}
+  100%{transform:scale(1);opacity:.6}
 }
 
 /* --- PREMIUM RING --- */
