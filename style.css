@@ -355,3 +355,14 @@ body{
   0%,100%{ transform: translateY(0) }
   50%{ transform: translateY(-8px) }
 }
+
+/* --- WELCOME SVG --- */
+
+.welcome-svg{
+  margin-bottom: 18px;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+body.light .welcome-screen{
+  background: radial-gradient(circle at top, #ffffff, #e6e8f0);
+}
