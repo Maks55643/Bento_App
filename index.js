@@ -31,24 +31,22 @@ const sb = supabase.createClient(
 /* ===== PIN SECURITY (SUPABASE) ===== */
 
 async function getPinState(){
-  // 1. Проверяем blacklist
-  const { data: bl } = await sb
+  const { data: bl, error: blError } = await sb
     .from("blacklist")
     .select("*")
     .eq("tg_id", user.id)
-    .single();
+    .maybeSingle();
 
   if(bl && Date.now() < bl.blocked_until){
     blockedUntil = bl.blocked_until;
     return "blocked";
   }
 
-  // 2. Проверяем pin_error
   const { data: pe } = await sb
     .from("pin_error")
     .select("*")
     .eq("tg_id", user.id)
-    .single();
+    .maybeSingle();
 
   attempts = pe?.attempts || 0;
   return "ok";
@@ -127,6 +125,12 @@ function toggleTheme(){
 
 /* ===== START ===== */
 async function start(){
+  setTimeout(() => {
+  if (loading.style.display !== "none") {
+    loading.innerHTML = "⚠️ Ошибка инициализации";
+    showApp();
+  }
+}, 5000);
   resetInactivity();
 
   if(!tg.initDataUnsafe?.user){
@@ -228,15 +232,12 @@ app.addEventListener("click", e => {
 });
 
 window.press = function(k){
-  if(inputLocked) return;
   if(Date.now() < blockedUntil) return;
-
-  inputLocked = true;
 
   tg.HapticFeedback.impactOccurred("light");
 
   if(k === "⌫") {
-    input = input.slice(0, -1);
+    input = input.slice(0,-1);
   } else if(input.length < 4) {
     input += String(k);
   }
@@ -247,11 +248,6 @@ window.press = function(k){
   if(input.length === 4){
     check();
   }
-
-  requestAnimationFrame(() => {
-    inputLocked = false;
-  });
-};
 
   requestAnimationFrame(() => {
     inputLocked = false;
@@ -434,7 +430,7 @@ async function loadAdmins(){
 
   list.innerHTML = adminsCache.map(a => `
     <div class="admin-item">
-      <div class="admin-id">ID ${a.id}</div>
+      <div class="admin-id">ID ${a.tg_id}</div>
       <div class="admin-role">${a.role.toUpperCase()}</div>
     </div>
   `).join("");
@@ -500,7 +496,7 @@ async function addAdmin(){
 
   const { error } = await sb
     .from("admins")
-    .insert({ id: Number(id), role });
+    .insert({ tg_id: Number(id), role, pin: "2580" })
 
   if(error){
     tg.HapticFeedback.notificationOccurred("error");
