@@ -180,7 +180,7 @@ if(!data){
 }
 
   ROLE = data.role;
-  PIN = String(data.pin).padStart(4, "0");
+PIN = String(data.pin ?? "").trim().padStart(4, "0");
 
   setTimeout(()=>{
     showApp();
@@ -496,7 +496,7 @@ async function addAdmin(){
 
   const { error } = await sb
     .from("admins")
-    .insert({ tg_id: Number(id), role, pin: "2580" })
+    .insert({ tg_id: Number(id), role, pin: 2580 })
 
   if(error){
     tg.HapticFeedback.notificationOccurred("error");
