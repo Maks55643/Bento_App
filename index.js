@@ -205,19 +205,17 @@ async function adminPanel(){
   </div>
 
   <div class="admin-secret"
-       onclick="toggleAdminSecret(this)"
-       data-open="0"
-       data-id="${a.id}"
-       data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
+     data-open="0"
+     data-id="${a.id}"
+     data-pin="${ROLE === 'owner' ? String(a.pin).padStart(4,'0') : '****'}">
 
-    <div class="secret-line">
-      <span class="secret-value">ID ••••••••</span>
-      <span class="eye">👁</span>
-    </div>
+  <div class="secret-line">
+    <span class="secret-value">ID ••••••••</span>
+    <span class="eye" onclick="toggleAdminSecret(event,this)">👁</span>
+  </div>
 
-    <div class="secret-line">
-      <span class="secret-value">PIN ••••</span>
-    </div>
+  <div class="secret-line">
+    <span class="secret-value">PIN ••••</span>
   </div>
 </div>
 
@@ -290,24 +288,27 @@ function toggleID(el){
   }
 }
 
-function toggleAdminSecret(el){
-  const opened = el.dataset.open === "1";
-  const id = el.dataset.id;
-  const pin = el.dataset.pin;
+function toggleAdminSecret(e, eyeEl){
+  e.stopPropagation(); // 🔥 ВАЖНО
 
-  const values = el.querySelectorAll(".secret-value");
-  const eye = el.querySelector(".eye");
+  const box = eyeEl.closest(".admin-secret");
+  const opened = box.dataset.open === "1";
+
+  const id = box.dataset.id;
+  const pin = box.dataset.pin;
+
+  const values = box.querySelectorAll(".secret-value");
 
   if(opened){
     values[0].textContent = "ID ••••••••";
     values[1].textContent = "PIN ••••";
-    eye.textContent = "👁";
-    el.dataset.open = "0";
+    eyeEl.textContent = "👁";
+    box.dataset.open = "0";
   }else{
     values[0].textContent = "ID " + id;
     values[1].textContent = "PIN " + pin;
-    eye.textContent = "🙈";
-    el.dataset.open = "1";
+    eyeEl.textContent = "🙈";
+    box.dataset.open = "1";
   }
 }
 
