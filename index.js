@@ -121,10 +121,12 @@ try{
   PIN = String(data.pin);
 
   setTimeout(()=>{
-    app.style.display = "flex";
-    drawPin();
-    showApp();
-  }, 1200);
+  showApp(); // сначала УБИРАЕМ loader
+
+  setTimeout(()=>{
+    drawPin(); // рисуем PIN ПОСЛЕ скрытия loader
+  }, 350);
+}, 1200);
 
   // страховка от вечной загрузки
 setTimeout(()=>{
