@@ -465,18 +465,47 @@ function formatMSK(ts){
   });
 }
 
+function activityStatus(ts){
+  if (!ts) {
+    return {
+      icon: "⚫",
+      text: "offline"
+    };
+  }
+
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+
+  if (min <= 2) {
+    return {
+      icon: "🟢",
+      text: "online"
+    };
+  }
+
+  return {
+    icon: "⚫",
+    text: "offline"
+  };
+}
+
 function renderAdmin(a){
   const blocked = a.blocked_until && Date.now() < a.blocked_until;
 
   return `
   <div class="admin-card">
     <div class="admin-header">
-      <div class="admin-name">
-  ${a.name || "Без имени"}
-  <span class="admin-last">
-    · ${formatMSK(a.last_activity)}
-  </span>
-</div>
+      ${(() => {
+  const st = activityStatus(a.last_activity);
+  return `
+    <div class="admin-name">
+      ${a.name || "Без имени"}
+      <span class="admin-status">
+        ${st.icon} ${st.text} · ${formatMSK(a.last_activity)}
+      </span>
+    </div>
+  `;
+})()}
       <div class="admin-role ${blocked ? "blocked" : a.role}">
         ${blocked ? "BLOCKED" : a.role.toUpperCase()}
       </div>
