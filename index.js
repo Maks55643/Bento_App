@@ -380,7 +380,7 @@ async function addAdmin(){
 
 /* ===== INIT ===== */
 start();
-
+tg.ready();
 setTimeout(() => {
   if (loading.style.display !== "none") {
     loading.innerHTML = "🌐 Проверьте интернет соединение";
