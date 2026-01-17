@@ -2,6 +2,7 @@
 const tg = Telegram.WebApp;
 tg.expand();
 tg.ready();
+tg.enableClosingConfirmation();
 tg.setHeaderColor("#0e0f14");
 tg.setBackgroundColor("#0e0f14");
 
@@ -14,6 +15,15 @@ const sb = supabase.createClient(
   "https://duqqpuitipndkghpqupb.supabase.co",
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
+
+async function pingDB(){
+  try{
+    await sb.from("admins").select("tg_id").limit(1);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
 
 /* ===== HASH ===== */
 async function hashPin(pin){
@@ -103,6 +113,12 @@ async function clearPinErrors(){
 
 /* ===== START ===== */
 async function start(){
+  if(!(await pingDB())){
+    loading.innerHTML = "🌐 Нет соединения с сервером";
+    showApp();
+    return;
+  }
+  
   if(!tg.initDataUnsafe?.user){
     loading.innerHTML = "⛔ Откройте через Telegram";
     showApp();
@@ -353,3 +369,10 @@ async function addAdmin(){
 
 /* ===== INIT ===== */
 start();
+
+setTimeout(() => {
+  if (loading.style.display !== "none") {
+    loading.innerHTML = "🌐 Проверьте интернет соединение";
+    showApp();
+  }
+}, 4000);
