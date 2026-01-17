@@ -158,6 +158,7 @@ if (ROLE === "owner") {
   // 🔐 ADMIN — с PIN
   drawPin();
 }
+}
 
 /* ===== PIN UI ===== */
 function drawPin(){
