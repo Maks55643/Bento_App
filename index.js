@@ -438,28 +438,22 @@ async function adminPanel(){
 
   app.innerHTML = `
     <div class="admin-wrap">
+      <div class="admin-box">
 
-      <div class="admin-header" onclick="menu()">← Назад</div>
+        <div class="admin-title" onclick="menu()">← Админы</div>
 
-      <div class="admin-card">
+        <div class="admin-form">
+          <input id="a_name" placeholder="Имя админа">
+          <input id="a_id" placeholder="Telegram ID" inputmode="numeric">
+          <input id="a_pin" placeholder="PIN (если ADMIN)">
+          <select id="a_role">
+            <option value="admin">ADMIN</option>
+            <option value="owner">OWNER</option>
+          </select>
+          <button onclick="addAdmin()">+ Добавить админа</button>
+        </div>
 
-        <input
-          id="aid"
-          class="admin-input"
-          placeholder="Telegram ID"
-          inputmode="numeric"
-        />
-
-        <select id="arole" class="admin-select">
-          <option value="admin">ADMIN</option>
-          <option value="owner">OWNER</option>
-        </select>
-
-        <button class="admin-btn" onclick="addAdmin()">
-          + Добавить админа
-        </button>
-
-        <div id="alist" class="admin-list"></div>
+        <div id="admins" class="admin-list"></div>
 
       </div>
     </div>
@@ -469,29 +463,48 @@ async function adminPanel(){
 }
 
 async function loadAdmins(){
-  const { data, error } = await sb
+  const { data } = await sb
     .from("admins")
-    .select("tg_id, role")
-    .order("role", { ascending: false });
+    .select("*")
+    .order("role", { ascending:false });
 
-  if (error) {
-    document.getElementById("alist").innerHTML =
-      "<div class='admin-empty'>Ошибка загрузки</div>";
-    return;
-  }
+  document.getElementById("admins").innerHTML =
+    data.map(renderAdmin).join("");
+}
 
-  if (!data.length) {
-    document.getElementById("alist").innerHTML =
-      "<div class='admin-empty'>Админов нет</div>";
-    return;
-  }
+function renderAdmin(a){
+  const blocked = a.blocked_until && Date.now() < a.blocked_until;
 
-  document.getElementById("alist").innerHTML = data.map(a => `
-    <div class="admin-item">
-      <div class="admin-id">ID ${a.tg_id}</div>
-      <div class="admin-role">${a.role.toUpperCase()}</div>
+  return `
+  <div class="admin-card">
+    <div class="admin-header">
+      <div class="admin-name">${a.name || "Без имени"}</div>
+      <div class="admin-role ${blocked ? "blocked" : a.role}">
+        ${blocked ? "BLOCKED" : a.role.toUpperCase()}
+      </div>
     </div>
-  `).join("");
+
+    <div class="admin-info">ID ${a.tg_id}</div>
+
+    ${a.role !== "owner" ? `
+      <div class="pin">
+        <div class="pin-code" id="pin-${a.tg_id}">••••</div>
+        <div class="pin-btn"
+             onclick="togglePin(${a.tg_id}, '${a.pin_hash}')">
+          показать
+        </div>
+      </div>
+    ` : ""}
+
+    ${a.role !== "owner" ? `
+      <div class="admin-actions">
+        <button onclick="blockAdmin(${a.tg_id}, 300000)">5 мин</button>
+        <button onclick="blockAdmin(${a.tg_id}, 0)">Навсегда</button>
+        <button onclick="deleteAdmin(${a.tg_id})">Удалить</button>
+      </div>
+    ` : ""}
+  </div>
+  `;
 }
 
 async function addAdmin(){
