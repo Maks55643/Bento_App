@@ -144,50 +144,52 @@ async function clearPinErrors(){
 /* ===== START ===== */
 async function start(){
   if(!(await pingDB())){
-    loading.innerHTML = "🌐 Нет соединения с сервером";
-    showApp();
+    deny("error");
     return;
   }
-  
+
   if(!tg.initDataUnsafe?.user){
-    loading.innerHTML = "⛔ Откройте через Telegram";
-    showApp();
+    deny("error");
     return;
   }
 
   user = tg.initDataUnsafe.user;
 
   const state = await getPinState();
-  if(state === "blocked"){
-    showApp();
-    showBlockedScreen();
+  if(state === "denied") return;
+
+  // ✅ ВОТ ЭТОГО НЕ ХВАТАЛО
+  const { data, error } = await sb
+    .from("admins")
+    .select("*")
+    .eq("tg_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    deny("error");
     return;
   }
 
-  if (error) {
-  loading.innerHTML = "⚠️ Ошибка базы данных";
-  showApp();
-  return;
-}
+  if (!data) {
+    deny("deleted");
+    return;
+  }
 
-if (!data) {
-  loading.innerHTML = "⛔ Нет доступа";
-  showApp();
-  return;
-}
+  if (!data.role) {
+    deny("no_role");
+    return;
+  }
 
   ROLE = data.role;
   PIN_HASH = data.pin_hash || "";
 
-showApp();
+  showApp();
 
-if (ROLE === "owner") {
-  // 👑 OWNER — без PIN
-  welcome();
-} else {
-  // 🔐 ADMIN — с PIN
-  drawPin();
-}
+  if (ROLE === "owner") {
+    welcome();
+  } else {
+    drawPin();
+  }
 }
 
 /* ===== PIN UI ===== */
