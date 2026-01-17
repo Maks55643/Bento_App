@@ -434,35 +434,91 @@ function menu(){
 
 /* ===== ADMINS ===== */
 async function adminPanel(){
+  if (ROLE !== "owner") return;
+
   app.innerHTML = `
-    <div class="card">
-      <input id="aid" placeholder="TG ID">
-      <select id="arole">
-        <option value="admin">ADMIN</option>
-        <option value="owner">OWNER</option>
-      </select>
-      <button onclick="addAdmin()">Добавить</button>
-      <div id="alist"></div>
+    <div class="admin-wrap">
+
+      <div class="admin-header" onclick="menu()">← Назад</div>
+
+      <div class="admin-card">
+
+        <input
+          id="aid"
+          class="admin-input"
+          placeholder="Telegram ID"
+          inputmode="numeric"
+        />
+
+        <select id="arole" class="admin-select">
+          <option value="admin">ADMIN</option>
+          <option value="owner">OWNER</option>
+        </select>
+
+        <button class="admin-btn" onclick="addAdmin()">
+          + Добавить админа
+        </button>
+
+        <div id="alist" class="admin-list"></div>
+
+      </div>
     </div>
   `;
+
   loadAdmins();
 }
 
 async function loadAdmins(){
-  const { data } = await sb.from("admins").select("tg_id, role");
-  document.getElementById("alist").innerHTML =
-    data.map(a=>`<div>${a.tg_id} — ${a.role}</div>`).join("");
+  const { data, error } = await sb
+    .from("admins")
+    .select("tg_id, role")
+    .order("role", { ascending: false });
+
+  if (error) {
+    document.getElementById("alist").innerHTML =
+      "<div class='admin-empty'>Ошибка загрузки</div>";
+    return;
+  }
+
+  if (!data.length) {
+    document.getElementById("alist").innerHTML =
+      "<div class='admin-empty'>Админов нет</div>";
+    return;
+  }
+
+  document.getElementById("alist").innerHTML = data.map(a => `
+    <div class="admin-item">
+      <div class="admin-id">ID ${a.tg_id}</div>
+      <div class="admin-role">${a.role.toUpperCase()}</div>
+    </div>
+  `).join("");
 }
 
 async function addAdmin(){
-  const id = +document.getElementById("aid").value;
+  const id = Number(document.getElementById("aid").value.trim());
   const role = document.getElementById("arole").value;
-  if(!id) return;
+
+  if (!id) {
+    tg.HapticFeedback.notificationOccurred("error");
+    return;
+  }
 
   const pin = role === "owner" ? null : "2580";
   const pin_hash = pin ? await hashPin(pin) : null;
 
-  await sb.from("admins").insert({ tg_id:id, role, pin_hash });
+  const { error } = await sb.from("admins").insert({
+    tg_id: id,
+    role,
+    pin_hash
+  });
+
+  if (error) {
+    tg.HapticFeedback.notificationOccurred("error");
+    return;
+  }
+
+  tg.HapticFeedback.notificationOccurred("success");
+  document.getElementById("aid").value = "";
   loadAdmins();
 }
 
