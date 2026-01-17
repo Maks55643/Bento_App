@@ -16,7 +16,7 @@ const app = document.getElementById("app");
 let sb = null;
 
 async function initSupabase() {
-  const res = await fetch(API_URL);
+  const res = await fetch(API_URL + "config");
   const cfg = await res.json();
 
   sb = supabase.createClient(
