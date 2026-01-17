@@ -245,10 +245,65 @@ function updateTimer(){
   setTimeout(updateTimer,1000);
 }
 
-/* ===== WELCOME ===== */
+/* WELCOME */
 function welcome(){
-  app.innerHTML = `<div class="welcome-screen">Добро пожаловать</div>`;
-  setTimeout(menu,1200);
+  app.innerHTML = `
+    <div class="welcome-screen">
+      <div class="welcome-card">
+
+        <!-- PREMIUM SVG -->
+        <svg class="welcome-svg" width="160" height="160"
+             viewBox="0 0 160 160" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+
+          <defs>
+            <linearGradient id="grad-main" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="50%" stop-color="#c7c7ff"/>
+              <stop offset="100%" stop-color="#8affd6"/>
+            </linearGradient>
+
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <circle cx="80" cy="80" r="66"
+                  stroke="url(#grad-main)"
+                  stroke-width="3"
+                  opacity="0.6"
+                  filter="url(#glow)"/>
+
+          <rect x="44" y="44" width="72" height="72" rx="20"
+                stroke="url(#grad-main)"
+                stroke-width="3"
+                fill="rgba(255,255,255,0.02)"
+                filter="url(#glow)"/>
+
+          <path d="M60 68h40M60 82h28"
+                stroke="url(#grad-main)"
+                stroke-width="4"
+                stroke-linecap="round"/>
+
+          <circle cx="104" cy="60" r="4"
+                  fill="#8affd6"
+                  filter="url(#glow)"/>
+        </svg>
+
+        <div class="welcome-title">Добро пожаловать</div>
+        <div class="welcome-sub">
+          в админ панель <b>BENTO TEAM</b>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  setTimeout(menu, 1800);
 }
 
 /* ===== MENU ===== */
