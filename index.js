@@ -223,7 +223,7 @@ async function start(){
     }
 
   } catch (e) {
-    console.error(e);
+    console.error("START ERROR:", e);
     deny("error");
   }
 }
