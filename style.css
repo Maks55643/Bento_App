@@ -424,3 +424,23 @@ body{
   color:#fff;
   font-size:12px;
 }
+
+.admin-list {
+  max-height: 60vh;          /* высота под экран */
+  overflow-y: auto;          /* вертикальный скролл */
+  padding-right: 6px;
+}
+
+/* плавный скролл */
+.admin-list {
+  scroll-behavior: smooth;
+}
+
+/* красивый скролл (не ломает TG) */
+.admin-list::-webkit-scrollbar {
+  width: 4px;
+}
+.admin-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
