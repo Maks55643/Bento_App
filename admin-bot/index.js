@@ -18,16 +18,6 @@ const API_URL = "https://bentoapp-production.up.railway.app";
 
 async function initSupabase() {
   const res = await fetch(API_URL + "/config");
-  const cfg = await res.json();
-
-  sb = supabase.createClient(
-    cfg.supabaseUrl,
-    cfg.supabaseAnonKey
-  );
-}
-
-async function initSupabase() {
-  const res = await fetch(API_URL + "/config");
 
   if (!res.ok) {
     throw new Error("Config fetch failed");
