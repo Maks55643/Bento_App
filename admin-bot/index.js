@@ -13,10 +13,17 @@ const loading = document.getElementById("loading");
 const app = document.getElementById("app");
 
 /* ===== SUPABASE ===== */
-const sb = supabase.createClient(
-  "https://duqqpuitipndkghpqupb.supabase.co",
-  "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
-);
+let sb = null;
+
+async function initSupabase() {
+  const res = await fetch(API_URL);
+  const cfg = await res.json();
+
+  sb = supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+}
 
 async function verifyInitData(){
   const controller = new AbortController();
@@ -721,6 +728,7 @@ function settingsPanel(){
 /* ===== INIT ===== */
 (async () => {
   await waitForInitData();
+  await initSupabase();
   start();
 })();
 
