@@ -471,8 +471,14 @@ async function addAdmin(){
   await waitForInitData();
   start();
 })();
+
 setTimeout(() => {
-  if (!denied &&
+  if (
+    !denied &&
     loading.style.display !== "none" &&
     app.style.display === "none"
-) {
+  ) {
+    loading.innerHTML = "🌐 Проверьте интернет соединение";
+    setTimeout(() => tg.close(), 2000);
+  }
+}, 4000);
