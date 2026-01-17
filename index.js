@@ -195,6 +195,12 @@ async function start(){
     ROLE = data.role;
     PIN_HASH = data.pin_hash || "";
 
+    // 🔥 обновляем последнюю активность
+   await sb
+    .from("admins")
+    .update({ last_activity: Date.now() })
+    .eq("tg_id", user.id);
+
     showApp();
     app.innerHTML = "";
 
@@ -447,13 +453,30 @@ async function loadAdmins(){
     data.map(renderAdmin).join("");
 }
 
+function formatMSK(ts){
+  if (!ts) return "—";
+
+  return new Date(ts).toLocaleString("ru-RU", {
+    timeZone: "Europe/Moscow",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
 function renderAdmin(a){
   const blocked = a.blocked_until && Date.now() < a.blocked_until;
 
   return `
   <div class="admin-card">
     <div class="admin-header">
-      <div class="admin-name">${a.name || "Без имени"}</div>
+      <div class="admin-name">
+  ${a.name || "Без имени"}
+  <span class="admin-last">
+    · ${formatMSK(a.last_activity)}
+  </span>
+</div>
       <div class="admin-role ${blocked ? "blocked" : a.role}">
         ${blocked ? "BLOCKED" : a.role.toUpperCase()}
       </div>
