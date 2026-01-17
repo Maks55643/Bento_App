@@ -733,3 +733,8 @@ setTimeout(() => {
     setTimeout(() => tg.close(), 2000);
   }
 }, 4000);
+
+fetch("bentoapp-production.up.railway.app")
+  .then(r => r.json())
+  .then(d => console.log("Railway:", d))
+  .catch(e => console.error("Railway error", e));
