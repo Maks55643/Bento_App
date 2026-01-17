@@ -335,12 +335,6 @@ function updateTimer(){
   setTimeout(updateTimer, 1000);
 }
 
-  const m = String(left/60000|0).padStart(2,"0");
-  const s = String(left/1000%60|0).padStart(2,"0");
-  el.textContent = `${m}:${s}`;
-  setTimeout(updateTimer,1000);
-}
-
 /* WELCOME */
 function welcome(){
   app.innerHTML = `
