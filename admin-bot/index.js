@@ -158,8 +158,15 @@ async function start(){
       deny("error");
       return;
     }
-
+    
+    /*
     const tg_id = await verifyInitData();
+    if (!tg_id) {
+      deny("error");
+      return;
+    } */
+
+    const tg_id = tg.initDataUnsafe?.user?.id;
     if (!tg_id) {
       deny("error");
       return;
