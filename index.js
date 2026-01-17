@@ -17,12 +17,12 @@ const sb = supabase.createClient(
 );
 
 async function pingDB(){
-  try{
-    await sb.from("admins").select("tg_id").limit(1);
-    return true;
-  }catch(e){
-    return false;
-  }
+  const { error } = await sb
+    .from("admins")
+    .select("tg_id")
+    .limit(1);
+
+  return !error;
 }
 
 /* ===== HASH ===== */
@@ -380,7 +380,6 @@ async function addAdmin(){
 
 /* ===== INIT ===== */
 start();
-tg.ready();
 setTimeout(() => {
   if (loading.style.display !== "none") {
     loading.innerHTML = "🌐 Проверьте интернет соединение";
