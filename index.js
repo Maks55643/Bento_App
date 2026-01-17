@@ -59,6 +59,34 @@ function showApp(){
   },300);
 }
 
+function deny(reason = "access"){
+  let text = "⛔ Нет доступа";
+
+  switch(reason){
+    case "banned":
+      text = "🚫 Вы заблокированы";
+      break;
+    case "no_role":
+      text = "👤 У вас нет прав доступа";
+      break;
+    case "deleted":
+      text = "🗑 Доступ удалён";
+      break;
+    case "error":
+      text = "⚠️ Ошибка сервера";
+      break;
+  }
+
+  loading.innerHTML = text;
+  showApp();
+
+  tg.HapticFeedback.notificationOccurred("error");
+
+  setTimeout(() => {
+    tg.close();
+  }, 2000);
+}
+
 /* ===== PIN STATE ===== */
 async function getPinState(){
   const { data: bl } = await sb
@@ -67,9 +95,11 @@ async function getPinState(){
     .eq("tg_id", user.id)
     .maybeSingle();
 
-  if(bl && Date.now() < bl.blocked_until){
-    blockedUntil = bl.blocked_until;
-    return "blocked";
+  if (bl) {
+    if (!bl.blocked_until || Date.now() < bl.blocked_until) {
+      deny("banned");
+      return "denied";
+    }
   }
 
   const { data: pe } = await sb
