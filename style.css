@@ -304,76 +304,79 @@ body{
 
 /* ===== ADMIN PANEL ===== */
 
-.admin-card{
-  padding: 22px;
+.admin-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.admin-header{
-  color: #7f8cff;
-  font-size: 15px;
-  margin-bottom: 18px;
+.admin-header {
+  color: #8aa2ff;
+  margin-bottom: 14px;
   cursor: pointer;
 }
 
-.admin-form{
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 22px;
+.admin-card {
+  width: 100%;
+  max-width: 360px;
+  background: #151722;
+  border-radius: 20px;
+  padding: 16px;
 }
 
 .admin-input,
-.admin-select{
-  height: 54px;
-  border-radius: 18px;
-  padding: 0 18px;
-  font-size: 15px;
-  color: var(--text);
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
-  outline: none;
-}
-
-.admin-input::placeholder{
-  color: rgba(255,255,255,.4);
-}
-
-.admin-select{
-  appearance: none;
-}
-
-.admin-btn{
-  height: 56px;
-  border-radius: 22px;
+.admin-select {
+  width: 100%;
+  height: 46px;
+  margin-bottom: 10px;
+  border-radius: 14px;
   border: none;
-  font-size: 17px;
+  padding: 0 14px;
+  background: #1e2130;
+  color: #fff;
+  font-size: 15px;
+}
+
+.admin-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg,#6f7cff,#7cf7d4);
+  background: linear-gradient(135deg, #6a7cff, #6cffc9);
+  margin-bottom: 14px;
 }
 
-.admin-btn:active{
-  transform: scale(.98);
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.admin-list{
-  margin-top: 10px;
+.admin-item {
+  background: #1e2130;
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.admin-item{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 20px;
-  padding: 14px 18px;
+.admin-id {
+  color: #fff;
+  font-size: 14px;
 }
 
-.admin-id{
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.admin-role{
+.admin-role {
   font-size: 12px;
-  opacity: .6;
-  margin-top: 2px;
+  color: #9aa4ff;
+  text-transform: uppercase;
+}
+
+.admin-empty {
+  text-align: center;
+  color: #777;
+  font-size: 14px;
 }
