@@ -154,6 +154,12 @@ function waitForInitData() {
 /* ===== START ===== */
 async function start(){
   try {
+
+    if (!sb) {
+      deny("error");
+      return;
+    }
+    
     if (!(await pingDB())) {
       deny("error");
       return;
