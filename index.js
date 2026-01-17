@@ -31,12 +31,18 @@ async function verifyInitData(){
       }
     );
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("verifyInitData failed:", res.status);
+      return null;
+    }
 
     const json = await res.json();
     return json.ok ? json.tg_id : null;
-  } catch {
+
+  } catch (e) {
+    console.error("verifyInitData error:", e);
     return null;
+
   } finally {
     clearTimeout(timer);
   }
@@ -68,6 +74,8 @@ let input = "";
 let inputLocked = false;
 let error = false;
 
+let denied = false;
+
 let attempts = 0;
 let blockedUntil = 0;
 
@@ -84,25 +92,25 @@ function showApp(){
 }
 
 function deny(reason = "access"){
+  if (denied) return; // ⛔ защита от повторов
+  denied = true;
+
   let text = "⛔ Нет доступа";
 
   switch(reason){
-    case "banned":
-      text = "🚫 Вы заблокированы";
-      break;
-    case "no_role":
-      text = "👤 У вас нет прав доступа";
-      break;
-    case "deleted":
-      text = "🗑 Доступ удалён";
-      break;
-    case "error":
-      text = "⚠️ Ошибка сервера";
-      break;
+    case "banned": text = "🚫 Вы заблокированы"; break;
+    case "no_role": text = "👤 У вас нет прав доступа"; break;
+    case "deleted": text = "🗑 Доступ удалён"; break;
+    case "error": text = "⚠️ Ошибка сервера"; break;
   }
 
+  // ⛔ полностью останавливаем app
+  app.innerHTML = "";
   app.style.display = "none";
+  app.style.pointerEvents = "none";
+
   loading.style.display = "flex";
+  loading.style.pointerEvents = "none";
   loading.innerHTML = `<div class="deny-text">${text}</div>`;
 
   tg.HapticFeedback.notificationOccurred("error");
@@ -110,7 +118,7 @@ function deny(reason = "access"){
   setTimeout(() => {
     tg.close();
   }, 2000);
-}
+
 
 /* ===== PIN STATE ===== */
 async function getPinState(){
