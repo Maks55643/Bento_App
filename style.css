@@ -465,3 +465,9 @@ body{
 body{
   overscroll-behavior: none;
 }
+
+html, body {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
