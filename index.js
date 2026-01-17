@@ -66,13 +66,11 @@ const BLOCK_TIME = 5 * 60 * 1000;
 
 /* ===== LOADER ===== */
 function showApp(){
-  loading.style.opacity = "0";
+  loading.style.display = "none";
   loading.style.pointerEvents = "none";
+
+  app.style.display = "flex";
   app.style.pointerEvents = "auto";
-  setTimeout(()=>{
-    loading.style.display = "none";
-    app.style.display = "flex";
-  },2000);
 }
 
 function deny(reason = "access"){
@@ -93,8 +91,9 @@ function deny(reason = "access"){
       break;
   }
 
-  loading.innerHTML = text;
-  showApp();
+  app.style.display = "none";
+  loading.style.display = "flex";
+  loading.innerHTML = `<div class="deny-text">${text}</div>`;
 
   tg.HapticFeedback.notificationOccurred("error");
 
@@ -205,12 +204,13 @@ user = {
   PIN_HASH = data.pin_hash || "";
 
   showApp();
+  app.innerHTML = "";
 
-  if (ROLE === "owner") {
-    welcome();
-  } else {
-    drawPin();
-  }
+if (ROLE === "owner") {
+  welcome();
+} else {
+  drawPin();
+}
 }
 
 /* ===== PIN UI ===== */
@@ -434,8 +434,11 @@ async function addAdmin(){
 /* ===== INIT ===== */
 start();
 setTimeout(() => {
-  if (loading.style.display !== "none") {
+  if (
+    loading.style.display !== "none" &&
+    app.style.display === "none"
+  ) {
     loading.innerHTML = "🌐 Проверьте интернет соединение";
-    showApp();
+    setTimeout(() => tg.close(), 2000);
   }
 }, 4000);
