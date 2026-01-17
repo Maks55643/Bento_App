@@ -1,5 +1,4 @@
 /* ===== TELEGRAM ===== */
-const API_URL = "https://bentoapp-production.up.railway.app/config";
 const tg = Telegram.WebApp;
 tg.expand();
 tg.ready();
@@ -15,9 +14,30 @@ const app = document.getElementById("app");
 /* ===== SUPABASE ===== */
 let sb = null;
 
+const API_URL = "https://bentoapp-production.up.railway.app";
+
 async function initSupabase() {
-  const res = await fetch(API_URL + "config");
+  const res = await fetch(API_URL + "/config");
   const cfg = await res.json();
+
+  sb = supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+}
+
+async function initSupabase() {
+  const res = await fetch(API_URL + "/config");
+
+  if (!res.ok) {
+    throw new Error("Config fetch failed");
+  }
+
+  const cfg = await res.json();
+
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    throw new Error("Invalid config");
+  }
 
   sb = supabase.createClient(
     cfg.supabaseUrl,
