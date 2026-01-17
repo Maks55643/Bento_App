@@ -42,6 +42,17 @@ async function verifyInitData(){
   }
 }
 
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.ok ? json.tg_id : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
   if (!res.ok) return null;
 
   const json = await res.json();
