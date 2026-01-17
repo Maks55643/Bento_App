@@ -412,12 +412,32 @@ function menu(){
           👑 BENTO ADMIN
         </div>
 
-        ${ROLE==="owner" ? `
+        ${ROLE === "owner" ? `
           <div class="menu-btn" onclick="adminPanel()">
             <span class="menu-icon">👥</span>
             <span class="menu-text">Админы</span>
           </div>
+
+          <div class="menu-btn" onclick="logsPanel()">
+            <span class="menu-icon">📜</span>
+            <span class="menu-text">Логи</span>
+          </div>
+
+          <div class="menu-btn danger" onclick="emergencyPanel()">
+            <span class="menu-icon">🚨</span>
+            <span class="menu-text">Экстренная ситуация</span>
+          </div>
         ` : ""}
+
+        <div class="menu-btn" onclick="requestsPanel()">
+          <span class="menu-icon">📨</span>
+          <span class="menu-text">Заявки</span>
+        </div>
+
+        <div class="menu-btn" onclick="settingsPanel()">
+          <span class="menu-icon">⚙️</span>
+          <span class="menu-text">Настройки</span>
+        </div>
 
         <div class="menu-btn exit" onclick="tg.close()">
           <span class="menu-icon">🚪</span>
@@ -629,6 +649,51 @@ async function deleteAdmin(tg_id){
 
   tg.HapticFeedback.notificationOccurred("success");
   loadAdmins();
+}
+
+function logsPanel(){
+  if (ROLE !== "owner") return;
+  app.innerHTML = `
+    <div class="card">
+      <div class="menu-title">📜 Логи</div>
+      <div class="menu-sub">Скоро будет</div>
+      <div class="menu-btn" onclick="menu()">← Назад</div>
+    </div>
+  `;
+}
+
+function emergencyPanel(){
+  if (ROLE !== "owner") return;
+
+  if (!confirm("⚠️ Экстренная панель. Продолжить?")) return;
+
+  app.innerHTML = `
+    <div class="card danger">
+      <div class="menu-title">🚨 Экстренная ситуация</div>
+      <div class="menu-sub">Доступ только для OWNER</div>
+      <div class="menu-btn" onclick="menu()">← Назад</div>
+    </div>
+  `;
+}
+
+function requestsPanel(){
+  app.innerHTML = `
+    <div class="card">
+      <div class="menu-title">📨 Заявки</div>
+      <div class="menu-sub">Пусто</div>
+      <div class="menu-btn" onclick="menu()">← Назад</div>
+    </div>
+  `;
+}
+
+function settingsPanel(){
+  app.innerHTML = `
+    <div class="card">
+      <div class="menu-title">⚙️ Настройки</div>
+      <div class="menu-sub">В разработке</div>
+      <div class="menu-btn" onclick="menu()">← Назад</div>
+    </div>
+  `;
 }
 
 /* ===== INIT ===== */
