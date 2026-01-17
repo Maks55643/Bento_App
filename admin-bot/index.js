@@ -1,4 +1,5 @@
 /* ===== TELEGRAM ===== */
+const API_URL = "bentoapp-production.up.railway.app";
 const tg = Telegram.WebApp;
 tg.expand();
 tg.ready();
