@@ -16,6 +16,22 @@ const sb = supabase.createClient(
   "sb_publishable_gN3Tyqs65cBJ0Ra9P7l0hQ_eB413MYU"
 );
 
+async function verifyInitData(){
+  const res = await fetch(
+    "https://duqqpuitipndkghpqupb.supabase.co/functions/v1/verify-telegram",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg.initData })
+    }
+  );
+
+  if (!res.ok) return null;
+
+  const json = await res.json();
+  return json.ok ? json.tg_id : null;
+}
+
 async function pingDB(){
   const { error } = await sb
     .from("admins")
@@ -148,12 +164,17 @@ async function start(){
     return;
   }
 
-  if(!tg.initDataUnsafe?.user){
-    deny("error");
-    return;
-  }
+  const tg_id = await verifyInitData();
+if (!tg_id) {
+  deny("error");
+  return;
+}
 
-  user = tg.initDataUnsafe.user;
+user = {
+  id: tg_id,
+  first_name: tg.initDataUnsafe.user?.first_name || "",
+  photo_url: tg.initDataUnsafe.user?.photo_url || ""
+};
 
   const state = await getPinState();
   if(state === "denied") return;
