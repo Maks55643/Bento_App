@@ -134,17 +134,17 @@ async function start(){
     return;
   }
 
-  const { data, error } = await sb
-    .from("admins")
-    .select("*")
-    .eq("tg_id", user.id)
-    .maybeSingle();
+  if (error) {
+  loading.innerHTML = "⚠️ Ошибка базы данных";
+  showApp();
+  return;
+}
 
-  if(error || !data){
-    loading.innerHTML = "⛔ Нет доступа";
-    showApp();
-    return;
-  }
+if (!data) {
+  loading.innerHTML = "⛔ Нет доступа";
+  showApp();
+  return;
+}
 
   ROLE = data.role;
   PIN_HASH = data.pin_hash || "";
