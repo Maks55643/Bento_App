@@ -14,26 +14,13 @@ const app = document.getElementById("app");
 /* ===== SUPABASE ===== */
 let sb = null;
 
-const API_URL = "https://bentoapp-production.up.railway.app";
+const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_W37lFR5w6xlYXYtUinLtjA_IEqOP-ci";
 
-async function initSupabase() {
-  const res = await fetch(API_URL + "/config");
-
-  if (!res.ok) {
-    throw new Error("Config fetch failed");
-  }
-
-  const cfg = await res.json();
-
-  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-    throw new Error("Invalid config");
-  }
-
-  sb = supabase.createClient(
-    cfg.supabaseUrl,
-    cfg.supabaseAnonKey
-  );
-}
+sb = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 async function verifyInitData(){
   const controller = new AbortController();
@@ -165,18 +152,11 @@ async function start(){
       return;
     }
     
-    /*
     const tg_id = await verifyInitData();
     if (!tg_id) {
       deny("error");
       return;
-    } */
-
-    const tg_id = tg.initDataUnsafe?.user?.id;
-    if (!tg_id) {
-      deny("error");
-      return;
-    }
+    } 
 
     user = {
       id: tg_id,
@@ -751,7 +731,6 @@ function settingsPanel(){
 /* ===== INIT ===== */
 (async () => {
   await waitForInitData();
-  await initSupabase();
   start();
 })();
 
