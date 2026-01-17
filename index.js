@@ -120,19 +120,6 @@ function deny(reason = "access"){
   }, 2000);
 }
 
-  if(attempts >= MAX_ATTEMPTS){
-    blockedUntil = Date.now() + BLOCK_TIME;
-
-    await sb.from("blacklist").upsert({
-      tg_id: user.id,
-      reason: "PIN exceeded",
-      blocked_until: blockedUntil
-    });
-
-    await sb.from("pin_error").delete().eq("tg_id", user.id);
-  }
-}
-
 function waitForInitData() {
   return new Promise(resolve => {
     if (tg.initData) return resolve();
@@ -261,6 +248,7 @@ function press(k){
 /* ===== CHECK ===== */
 async function check(){
   if (ROLE === "owner") return;
+
   inputLocked = true;
 
   const ok = PIN_HASH && await hashPin(input) === PIN_HASH;
@@ -269,6 +257,7 @@ async function check(){
     tg.HapticFeedback.notificationOccurred("success");
     input = "";
     attempts = 0;
+    inputLocked = false;
     welcome();
     return;
   }
@@ -457,7 +446,7 @@ function renderAdmin(a){
       <div class="pin">
         <div class="pin-code" id="pin-${a.tg_id}">••••</div>
         <div class="pin-btn"
-             onclick="togglePin(${a.tg_id}, '${a.pin_hash}')">
+             onclick="togglePin(${a.tg_id})">
           показать
         </div>
       </div>
@@ -479,6 +468,11 @@ async function addAdmin(){
   const id   = Number(document.getElementById("a_id").value.trim());
   const role = document.getElementById("a_role").value;
   const pin  = document.getElementById("a_pin").value.trim();
+
+  if (role === "admin" && !pin) {
+    alert("PIN обязателен для ADMIN");
+    return;
+  }
 
   if (!id || !name) {
     tg.HapticFeedback.notificationOccurred("error");
@@ -523,14 +517,9 @@ async function blockAdmin(tg_id, time){
   loadAdmins();
 }
 
-function togglePin(id, hash){
+function togglePin(id){
   const el = document.getElementById(`pin-${id}`);
-
-  if (el.textContent === "••••") {
-    el.textContent = hash ? "HASHED" : "—";
-  } else {
-    el.textContent = "••••";
-  }
+  el.textContent = el.textContent === "••••" ? "СКРЫТО" : "••••";
 }
 
 /* ===== INIT ===== */
