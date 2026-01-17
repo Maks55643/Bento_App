@@ -42,23 +42,6 @@ async function verifyInitData(){
   }
 }
 
-    if (!res.ok) return null;
-
-    const json = await res.json();
-    return json.ok ? json.tg_id : null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-  if (!res.ok) return null;
-
-  const json = await res.json();
-  return json.ok ? json.tg_id : null;
-}
-
 async function pingDB(){
   const { error } = await sb
     .from("admins")
@@ -185,22 +168,29 @@ async function clearPinErrors(){
 
 /* ===== START ===== */
 async function start(){
-  if(!(await pingDB())){
-    deny("error");
-    return;
-  }
+  try {
+    if(!(await pingDB())){
+      deny("error");
+      return;
+    }
 
-  const tg_id = await verifyInitData();
-if (!tg_id) {
-  deny("error");
-  return;
-}
+    const tg_id = await verifyInitData();
+    if (!tg_id) {
+      deny("error");
+      return;
+    }
 
 user = {
   id: tg_id,
   first_name: tg.initDataUnsafe.user?.first_name || "",
   photo_url: tg.initDataUnsafe.user?.photo_url || ""
 };
+
+  } catch(e){
+    console.error(e);
+    deny("error");
+  }
+}
 
   const state = await getPinState();
   if(state === "denied") return;
