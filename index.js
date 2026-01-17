@@ -17,14 +17,30 @@ const sb = supabase.createClient(
 );
 
 async function verifyInitData(){
-  const res = await fetch(
-    "https://duqqpuitipndkghpqupb.supabase.co/functions/v1/verify-telegram",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: tg.initData })
-    }
-  );
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const res = await fetch(
+      "https://duqqpuitipndkghpqupb.supabase.co/functions/v1/verify-telegram",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg.initData }),
+        signal: controller.signal
+      }
+    );
+
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.ok ? json.tg_id : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
   if (!res.ok) return null;
 
