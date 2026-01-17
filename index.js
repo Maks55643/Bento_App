@@ -2,6 +2,7 @@
 const tg = Telegram.WebApp;
 tg.expand();
 tg.ready();
+tg.disableVerticalSwipes();
 tg.enableClosingConfirmation();
 tg.setHeaderColor("#0e0f14");
 tg.setBackgroundColor("#0e0f14");
