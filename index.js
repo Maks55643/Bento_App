@@ -405,10 +405,26 @@ function welcome(){
 /* ===== MENU ===== */
 function menu(){
   app.innerHTML = `
-    <div class="card">
-      <div class="menu-title">👑 BENTO ADMIN</div>
-      ${ROLE==="owner"?`<div class="menu-item" onclick="adminPanel()">👥 Админы</div>`:""}
-      <div class="menu-item exit" onclick="tg.close()">🚪 Выйти</div>
+    <div class="menu-wrap">
+      <div class="menu-card">
+
+        <div class="menu-title">
+          👑 BENTO ADMIN
+        </div>
+
+        ${ROLE==="owner" ? `
+          <div class="menu-btn" onclick="adminPanel()">
+            <span class="menu-icon">👥</span>
+            <span class="menu-text">Админы</span>
+          </div>
+        ` : ""}
+
+        <div class="menu-btn exit" onclick="tg.close()">
+          <span class="menu-icon">🚪</span>
+          <span class="menu-text">Выйти</span>
+        </div>
+
+      </div>
     </div>
   `;
 }
