@@ -120,40 +120,6 @@ function deny(reason = "access"){
   }, 2000);
 }
 
-/* ===== PIN STATE ===== */
-async function getPinState(){
-  const { data: bl } = await sb
-    .from("blacklist")
-    .select("*")
-    .eq("tg_id", user.id)
-    .maybeSingle();
-
-  if (bl) {
-    if (!bl.blocked_until || Date.now() < bl.blocked_until) {
-      deny("banned");
-      return "denied";
-    }
-  }
-
-  const { data: pe } = await sb
-    .from("pin_error")
-    .select("*")
-    .eq("tg_id", user.id)
-    .maybeSingle();
-
-  attempts = pe?.attempts || 0;
-  return "ok";
-}
-
-async function registerPinError(){
-  attempts++;
-
-  await sb.from("pin_error").upsert({
-    tg_id: user.id,
-    attempts,
-    last_attempt: Date.now()
-  });
-
   if(attempts >= MAX_ATTEMPTS){
     blockedUntil = Date.now() + BLOCK_TIME;
 
@@ -165,13 +131,6 @@ async function registerPinError(){
 
     await sb.from("pin_error").delete().eq("tg_id", user.id);
   }
-}
-
-async function clearPinErrors(){
-  attempts = 0;
-  blockedUntil = 0;
-  await sb.from("pin_error").delete().eq("tg_id", user.id);
-  await sb.from("blacklist").delete().eq("tg_id", user.id);
 }
 
 function waitForInitData() {
@@ -205,9 +164,6 @@ async function start(){
       first_name: tg.initDataUnsafe.user?.first_name || "",
       photo_url: tg.initDataUnsafe.user?.photo_url || ""
     };
-
-    const state = await getPinState();
-    if (state === "denied") return;
 
     const { data, error } = await sb
       .from("admins")
@@ -304,31 +260,37 @@ function press(k){
 
 /* ===== CHECK ===== */
 async function check(){
-  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
+  if (ROLE === "owner") return;
   inputLocked = true;
 
-  if(
-    ROLE === "owner" ||
-    (PIN_HASH && await hashPin(input) === PIN_HASH)
-  ){
+  const ok = PIN_HASH && await hashPin(input) === PIN_HASH;
+
+  if (ok) {
     tg.HapticFeedback.notificationOccurred("success");
     input = "";
-    await clearPinErrors();
+    attempts = 0;
     welcome();
     return;
   }
 
+  attempts++;
   tg.HapticFeedback.notificationOccurred("error");
-  input = "";
-  error = true;
-  inputLocked = false;
-  await registerPinError();
 
-  if(attempts >= MAX_ATTEMPTS){
+  if (attempts >= MAX_ATTEMPTS) {
+    blockedUntil = Date.now() + BLOCK_TIME;
+
+    await sb
+      .from("admins")
+      .update({ blocked_until: blockedUntil })
+      .eq("tg_id", user.id);
+
     showBlockedScreen();
     return;
   }
 
+  input = "";
+  error = true;
+  inputLocked = false;
   drawPin();
 }
 
