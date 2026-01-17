@@ -225,6 +225,11 @@ async function start(){
       return;
     }
 
+    if (data.blocked_until && Date.now() < data.blocked_until) {
+      deny("banned");
+      return;
+    }
+
     if (!data.role) {
       deny("no_role");
       return;
@@ -508,31 +513,62 @@ function renderAdmin(a){
 }
 
 async function addAdmin(){
-  const id = Number(document.getElementById("aid").value.trim());
-  const role = document.getElementById("arole").value;
+  const name = document.getElementById("a_name").value.trim();
+  const id   = Number(document.getElementById("a_id").value.trim());
+  const role = document.getElementById("a_role").value;
+  const pin  = document.getElementById("a_pin").value.trim();
 
-  if (!id) {
+  if (!id || !name) {
     tg.HapticFeedback.notificationOccurred("error");
     return;
   }
 
-  const pin = role === "owner" ? null : "2580";
-  const pin_hash = pin ? await hashPin(pin) : null;
+  const pin_hash =
+    role === "owner" ? null :
+    pin ? await hashPin(pin) : null;
 
   const { error } = await sb.from("admins").insert({
     tg_id: id,
+    name,
     role,
-    pin_hash
+    pin_hash,
+    blocked_until: null
   });
 
   if (error) {
+    alert(error.message);
     tg.HapticFeedback.notificationOccurred("error");
     return;
   }
 
   tg.HapticFeedback.notificationOccurred("success");
-  document.getElementById("aid").value = "";
+
+  document.getElementById("a_name").value = "";
+  document.getElementById("a_id").value = "";
+  document.getElementById("a_pin").value = "";
+
   loadAdmins();
+}
+
+async function blockAdmin(tg_id, time){
+  const until = time === 0 ? 9999999999999 : Date.now() + time;
+
+  await sb
+    .from("admins")
+    .update({ blocked_until: until })
+    .eq("tg_id", tg_id);
+
+  loadAdmins();
+}
+
+function togglePin(id, hash){
+  const el = document.getElementById(`pin-${id}`);
+
+  if (el.textContent === "••••") {
+    el.textContent = hash ? "HASHED" : "—";
+  } else {
+    el.textContent = "••••";
+  }
 }
 
 /* ===== INIT ===== */
