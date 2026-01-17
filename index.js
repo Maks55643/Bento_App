@@ -676,12 +676,33 @@ function emergencyPanel(){
   `;
 }
 
+/* ===== REQUESTS ===== */
 function requestsPanel(){
   app.innerHTML = `
-    <div class="card">
-      <div class="menu-title">📨 Заявки</div>
-      <div class="menu-sub">Пусто</div>
-      <div class="menu-btn" onclick="menu()">← Назад</div>
+    <div class="admin-wrap">
+      <div class="admin-box">
+
+        <div class="admin-title" onclick="menu()">← Заявки</div>
+
+        <div class="admin-list" id="requests-list">
+
+          <div class="admin-card">
+            <div class="admin-header">
+              <div class="admin-name">
+                Нет заявок
+                <span class="admin-status">📭 пусто</span>
+              </div>
+              <div class="admin-role admin">INFO</div>
+            </div>
+
+            <div class="admin-info">
+              Здесь будут отображаться входящие заявки
+            </div>
+          </div>
+
+        </div>
+
+      </div>
     </div>
   `;
 }
