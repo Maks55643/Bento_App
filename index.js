@@ -56,7 +56,7 @@ function showApp(){
   setTimeout(()=>{
     loading.style.display = "none";
     app.style.display = "flex";
-  },300);
+  },2000);
 }
 
 function deny(reason = "access"){
