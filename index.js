@@ -147,9 +147,15 @@ async function start(){
   }
 
   ROLE = data.role;
-  PIN_HASH = data.pin_hash || "";
+PIN_HASH = data.pin_hash || "";
 
-  showApp();
+showApp();
+
+if (ROLE === "owner") {
+  // 👑 OWNER — без PIN
+  welcome();
+} else {
+  // 🔐 ADMIN — с PIN
   drawPin();
 }
 
