@@ -462,6 +462,13 @@ body{
   flex-shrink: 0;
 }
 
+.admin-last{
+  font-size:11px;
+  color:#9aa0c6;
+  margin-left:6px;
+  font-weight:400;
+}
+
 body{
   overscroll-behavior: none;
 }
