@@ -174,6 +174,18 @@ async function clearPinErrors(){
   await sb.from("blacklist").delete().eq("tg_id", user.id);
 }
 
+function waitForInitData() {
+  return new Promise(resolve => {
+    if (tg.initData) return resolve();
+    const i = setInterval(() => {
+      if (tg.initData) {
+        clearInterval(i);
+        resolve();
+      }
+    }, 50);
+  });
+}
+
 /* ===== START ===== */
 async function start(){
   try {
@@ -455,13 +467,12 @@ async function addAdmin(){
 }
 
 /* ===== INIT ===== */
-start();
+(async () => {
+  await waitForInitData();
+  start();
+})();
 setTimeout(() => {
-  if (
+  if (!denied &&
     loading.style.display !== "none" &&
     app.style.display === "none"
-  ) {
-    loading.innerHTML = "🌐 Проверьте интернет соединение";
-    setTimeout(() => tg.close(), 2000);
-  }
-}, 4000);
+) {
