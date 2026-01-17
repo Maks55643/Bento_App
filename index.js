@@ -169,9 +169,22 @@ async function start(){
       return;
     }
 
-    if (data.blocked_until && Date.now() < data.blocked_until) {
-      deny("banned");
+    // 🔒 PIN-блок (временный)
+    if (
+      data.blocked_until &&
+      data.blocked_until !== 9999999999999 &&
+      Date.now() < data.blocked_until
+    ) {
+      blockedUntil = data.blocked_until;
+      showApp();
+      showBlockedScreen();
       return;
+    }
+
+   // 🚫 Перманентный бан (только owner)
+   if (data.blocked_until === 9999999999999) {
+     deny("banned");
+     return;
     }
 
     if (!data.role) {
@@ -299,17 +312,28 @@ function showBlockedScreen(){
 }
 
 function updateTimer(){
-  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
   const el = document.getElementById("timer");
-  if(!el) return;
+  if (!el) return;
 
   const left = blockedUntil - Date.now();
-  if(left <= 0){
+
+  if (left <= 0) {
     blockedUntil = 0;
     attempts = 0;
-    drawPin();
+    input = "";
+    error = false;
+
+    drawPin(); // 🔥 возврат к PIN
     return;
   }
+
+  const m = String(Math.floor(left / 60000)).padStart(2, "0");
+  const s = String(Math.floor(left / 1000) % 60).padStart(2, "0");
+
+  el.textContent = `${m}:${s}`;
+
+  setTimeout(updateTimer, 1000);
+}
 
   const m = String(left/60000|0).padStart(2,"0");
   const s = String(left/1000%60|0).padStart(2,"0");
