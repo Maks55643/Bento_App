@@ -169,7 +169,7 @@ async function clearPinErrors(){
 /* ===== START ===== */
 async function start(){
   try {
-    if(!(await pingDB())){
+    if (!(await pingDB())) {
       deny("error");
       return;
     }
@@ -180,54 +180,52 @@ async function start(){
       return;
     }
 
-user = {
-  id: tg_id,
-  first_name: tg.initDataUnsafe.user?.first_name || "",
-  photo_url: tg.initDataUnsafe.user?.photo_url || ""
-};
+    user = {
+      id: tg_id,
+      first_name: tg.initDataUnsafe.user?.first_name || "",
+      photo_url: tg.initDataUnsafe.user?.photo_url || ""
+    };
 
-  } catch(e){
+    const state = await getPinState();
+    if (state === "denied") return;
+
+    const { data, error } = await sb
+      .from("admins")
+      .select("*")
+      .eq("tg_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      deny("error");
+      return;
+    }
+
+    if (!data) {
+      deny("deleted");
+      return;
+    }
+
+    if (!data.role) {
+      deny("no_role");
+      return;
+    }
+
+    ROLE = data.role;
+    PIN_HASH = data.pin_hash || "";
+
+    showApp();
+    app.innerHTML = "";
+
+    if (ROLE === "owner") {
+      welcome();
+    } else {
+      drawPin();
+    }
+
+  } catch (e) {
     console.error(e);
     deny("error");
   }
-}
-
-  const state = await getPinState();
-  if(state === "denied") return;
-
-  // ✅ ВОТ ЭТОГО НЕ ХВАТАЛО
-  const { data, error } = await sb
-    .from("admins")
-    .select("*")
-    .eq("tg_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    deny("error");
-    return;
-  }
-
-  if (!data) {
-    deny("deleted");
-    return;
-  }
-
-  if (!data.role) {
-    deny("no_role");
-    return;
-  }
-
-  ROLE = data.role;
-  PIN_HASH = data.pin_hash || "";
-
-  showApp();
-  app.innerHTML = "";
-
-if (ROLE === "owner") {
-  welcome();
-} else {
-  drawPin();
-}
 }
 
 /* ===== PIN UI ===== */
