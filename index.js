@@ -147,7 +147,7 @@ async function start(){
   }
 
   ROLE = data.role;
-PIN_HASH = data.pin_hash || "";
+  PIN_HASH = data.pin_hash || "";
 
 showApp();
 
@@ -161,6 +161,7 @@ if (ROLE === "owner") {
 
 /* ===== PIN UI ===== */
 function drawPin(){
+  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
   if(Date.now() < blockedUntil) return;
 
   app.innerHTML = `
@@ -194,6 +195,7 @@ app.addEventListener("click", e=>{
 });
 
 function press(k){
+  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
   if(inputLocked || Date.now() < blockedUntil) return;
   tg.HapticFeedback.impactOccurred("light");
 
@@ -208,6 +210,7 @@ function press(k){
 
 /* ===== CHECK ===== */
 async function check(){
+  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
   inputLocked = true;
 
   if(
@@ -250,6 +253,7 @@ function showBlockedScreen(){
 }
 
 function updateTimer(){
+  if (ROLE === "owner") return; // ⛔ owner никогда не видит PIN
   const el = document.getElementById("timer");
   if(!el) return;
 
