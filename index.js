@@ -469,6 +469,11 @@ async function addAdmin(){
   const role = document.getElementById("a_role").value;
   const pin  = document.getElementById("a_pin").value.trim();
 
+  if (role === "owner" && pin) {
+    alert("OWNER не использует PIN");
+    return;
+  }
+
   if (role === "admin" && !pin) {
     alert("PIN обязателен для ADMIN");
     return;
@@ -520,6 +525,23 @@ async function blockAdmin(tg_id, time){
 function togglePin(id){
   const el = document.getElementById(`pin-${id}`);
   el.textContent = el.textContent === "••••" ? "СКРЫТО" : "••••";
+}
+
+async function deleteAdmin(tg_id){
+  if (!confirm("Удалить админа?")) return;
+
+  const { error } = await sb
+    .from("admins")
+    .delete()
+    .eq("tg_id", tg_id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  tg.HapticFeedback.notificationOccurred("success");
+  loadAdmins();
 }
 
 /* ===== INIT ===== */
