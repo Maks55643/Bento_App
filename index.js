@@ -118,7 +118,7 @@ function deny(reason = "access"){
   setTimeout(() => {
     tg.close();
   }, 2000);
-
+}
 
 /* ===== PIN STATE ===== */
 async function getPinState(){
