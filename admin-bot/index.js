@@ -126,13 +126,19 @@ function deny(reason = "access"){
   }, 2000);
 }
 
-function waitForInitData() {
-  return new Promise(resolve => {
+function waitForInitData(timeout = 3000) {
+  return new Promise((resolve, reject) => {
     if (tg.initData) return resolve();
+
+    const start = Date.now();
     const i = setInterval(() => {
       if (tg.initData) {
         clearInterval(i);
         resolve();
+      }
+      if (Date.now() - start > timeout) {
+        clearInterval(i);
+        reject("Telegram initData timeout");
       }
     }, 50);
   });
@@ -737,8 +743,13 @@ function settingsPanel(){
 
 /* ===== INIT ===== */
 (async () => {
-  await waitForInitData();
-  start();
+  try {
+    await waitForInitData();
+    start();
+  } catch (e) {
+    console.error(e);
+    loading.innerHTML = "❌ Откройте через Telegram";
+  }
 })();
 
 setTimeout(() => {
