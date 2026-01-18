@@ -14,6 +14,16 @@ const app = document.getElementById("app");
 /* ===== SUPABASE ===== */
 let sb = null;
 
+async function initSupabase() {
+  const res = await fetch("/config");
+  const cfg = await res.json();
+
+  sb = supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+}
+
 const SUPABASE_URL = "https://duqqpuitipndkghpqupb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_W37lFR5w6xlYXYtUinLtjA_IEqOP-ci";
 
@@ -745,6 +755,7 @@ function settingsPanel(){
 (async () => {
   try {
     await waitForInitData();
+    await initSupabase();
     start();
   } catch (e) {
     console.error(e);
