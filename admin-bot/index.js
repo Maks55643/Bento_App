@@ -187,16 +187,18 @@ async function start(){
     }
 
     // 🔒 PIN-блок (временный)
-    if (
-      data.blocked_until &&
-      data.blocked_until !== 9999999999999 &&
-      Date.now() < data.blocked_until
-    ) {
-      blockedUntil = data.blocked_until;
-      showApp();
-      showBlockedScreen();
-      return;
-    }
+    const blockedUntilDB = Number(data.blocked_until || 0);
+
+   if (
+   blockedUntilDB !== 0 &&
+   blockedUntilDB !== 9999999999999 &&
+   Date.now() < blockedUntilDB
+ ) {
+   blockedUntil = blockedUntilDB;
+   showApp();
+   showBlockedScreen();
+   return;
+ }
 
    // 🚫 Перманентный бан (только owner)
    if (data.blocked_until === 9999999999999) {
