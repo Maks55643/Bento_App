@@ -639,6 +639,11 @@ async function addAdmin(){
 
 async function blockAdmin(tg_id, time){
   const until = time === 0 ? 9999999999999 : Date.now() + time;
+  
+  if (tg_id === user.id) {
+  alert("Нельзя заблокировать себя");
+  return;
+}
 
   await sb
     .from("admins")
