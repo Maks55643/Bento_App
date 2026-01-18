@@ -2,7 +2,8 @@ import express from "express";
 
 const app = express();
 
-// ===== CONFIG FOR MINI APP =====
+app.use(express.json());
+
 app.get("/config", (req, res) => {
   res.json({
     supabaseUrl: process.env.SUPABASE_URL,
@@ -10,10 +11,8 @@ app.get("/config", (req, res) => {
   });
 });
 
-// ===== STATIC MINI APP =====
 app.use("/admin-bot", express.static("admin-bot"));
 
-// ===== HEALTH CHECK =====
 app.get("/", (req, res) => {
   res.send("BENTO backend OK");
 });
